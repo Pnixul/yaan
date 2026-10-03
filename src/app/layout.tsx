@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
+import "./shell.css";
+import { AppNavigation } from "@/components/app-navigation";
 
 export const metadata: Metadata = {
   title: "YAAN — Get to know the neighbourhood",
@@ -13,7 +15,10 @@ export default function RootLayout({
 }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <AppNavigation />
+        {children}
+      </body>
     </html>
   );
 }

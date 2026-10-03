@@ -1,8 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useCallback, useMemo, useReducer, useState } from "react";
-import { ArrowUpRight, FlaskConical, MapPin, Waves, X } from "lucide-react";
+import { ArrowUpRight, MapPin, X } from "lucide-react";
 import { LocationSearch } from "@/components/location-search";
 import { LocationResult } from "@/components/location-result";
 import { FloodContext } from "@/components/flood-context";
@@ -19,6 +18,7 @@ import { buildMockRoute } from "@/lib/mock-routes";
 import {
   explorationReducer,
   initialExploration,
+  type ExplorationState,
 } from "@/lib/exploration-state";
 const NeighborhoodMap = dynamic(() => import("@/components/neighborhood-map"), {
   ssr: false,
@@ -29,9 +29,13 @@ const NeighborhoodMap = dynamic(() => import("@/components/neighborhood-map"), {
     </div>
   ),
 });
-export function MapExperience() {
-  const [state, dispatch] = useReducer(explorationReducer, initialExploration);
-  const [expanded, setExpanded] = useState(false);
+export function MapExperience({
+  initialState = initialExploration,
+}: {
+  initialState?: ExplorationState;
+}) {
+  const [state, dispatch] = useReducer(explorationReducer, initialState);
+  const [expanded, setExpanded] = useState(Boolean(initialState.placeId));
   const [showReports, setShowReports] = useState(true);
   const area = MOCK_AREAS.find((item) => item.id === state.areaId)!;
   const reference =
@@ -82,30 +86,10 @@ export function MapExperience() {
     }
   }
   return (
-    <main className="yaan-app">
+    <main id="main-content" tabIndex={-1} className="yaan-app">
       <a href="#area-summary" className="skip-link">
         Skip to location details
       </a>
-      <header className="app-header">
-        <Link className="brand" href="/" aria-label="YAAN home">
-          <span className="brand-icon">
-            <Waves size={23} strokeWidth={1.8} />
-          </span>
-          <span>
-            yaan<span className="brand-period">.</span>
-          </span>
-        </Link>
-        <span className="brand-tagline">Every place has a story.</span>
-        <div className="header-right">
-          <span className="city-label">
-            <MapPin size={14} /> Bangkok, Thailand
-          </span>
-          <span className="prototype-badge">
-            <FlaskConical size={14} />
-            <span>Exploration prototype</span>
-          </span>
-        </div>
-      </header>
       <div className="explore-layout">
         <LocationResult
           area={area}
@@ -227,7 +211,7 @@ export function MapExperience() {
               </div>
             )}
           </div>
-          <div className="map-legend">
+          <div className={`map-legend${state.routing ? " is-route" : ""}`}>
             {state.view === "conditions" ? (
               <>
                 <span className="legend-area" />

@@ -9,7 +9,7 @@ export function LocationSearch({
   onOpen,
 }: {
   onSelect: (location: SearchResult) => void;
-  onOpen: () => void;
+  onOpen?: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -66,11 +66,11 @@ export function LocationSearch({
           value={query}
           onFocus={() => {
             setOpen(true);
-            onOpen();
+            onOpen?.();
           }}
           onClick={() => {
             setOpen(true);
-            onOpen();
+            onOpen?.();
           }}
           onChange={(event) => {
             setQuery(event.target.value);

@@ -164,6 +164,10 @@ Do not send an entire raw flood dataset to the browser when only a small geograp
 
 ## Application Architecture
 
+The App Router exposes Home at `/`, Explore at `/explore`, and minimal planned-feature placeholders at `/saved` and `/account`. A shared layout owns the responsive primary navigation. Home content stays server-rendered, with small client components for search and active navigation; MapLibre remains confined to Explore.
+
+Home links carry an `area` or `place` fixture ID in Explore's query parameters. Resolve those IDs against known mock data before initializing the existing exploration reducer, and ignore unknown values. A specific-place entry opens inspection without silently choosing a reference. Entry URLs preserve selection intent on reload; subsequent map state is not persisted or synchronized to the URL. No authentication, storage, or new provider is needed for this flow.
+
 The core location exploration prototype runs client-side with local typed fixtures. Keep areas and flood history, specific places and categories, mock route geometry, and interaction state separate from presentation components. The reference location is the origin for nearby distances and route previews.
 
 Use the existing MapLibre basemap and worker setup. No geocoding, POI, routing, database, or authentication integration is required for this prototype. Supabase and provider guidance elsewhere in this document describes future integration direction, not a requirement to install them now.

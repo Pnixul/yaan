@@ -47,6 +47,10 @@ YAAN should avoid looking like:
 
 ## Mobile-First Design
 
+Home and shared navigation extend the established YAAN palette, typography, and calm editorial composition. Home leads with a short value proposition and search, followed by useful example area links and a brief explanation. Use spacing, restrained surfaces, and Lucide icons for character; avoid decorative feature grids, invented metrics, testimonials, and heavy effects.
+
+Start with a stacked layout at small widths. Progressively enhance Home into a wider introduction and example-area composition on desktop. Mobile primary navigation uses labelled icon links along the bottom; desktop uses header links. Reserve navigation space in both scrolling pages and the fixed-height Explore workspace, including safe-area insets. Keep clear focus styles and comfortable touch targets.
+
 Design the core experience for mobile first.
 
 Mobile layouts should prioritize:

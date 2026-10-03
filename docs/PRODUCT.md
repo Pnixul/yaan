@@ -36,6 +36,16 @@ Users do not need to be physically present at the location they are exploring.
 
 ## Product Principles
 
+### Product Structure
+
+Home introduces YAAN as a location-first product and offers search immediately. It supports people considering somewhere to live or stay, researching a move, getting to know an unfamiliar area, or understanding the neighbourhood they already live in. It is not a booking platform or general travel-discovery feed.
+
+The implemented entry points are Home (`/`) and the established Explore workspace (`/explore`). Home provides search, example areas, and a brief explanation of nearby essentials, journey context, and area history. Explore remains the place for investigation; Home does not duplicate its map interactions.
+
+Primary navigation contains Home, Explore, Saved, and Account. Saved and Account currently have clearly labelled prototype placeholders only. The broader planned information architecture also includes Sign in / Sign up, About YAAN, Data & Sources, and supporting Privacy / Feedback content. Those experiences are not implemented.
+
+Guest exploration is a product principle: Home, search, reference selection, nearby places, routes, and area context remain accessible without authentication. Future authentication should appear only for account-dependent actions, such as saving a place.
+
 ### Location First
 
 The location the user cares about is the starting point of the experience.

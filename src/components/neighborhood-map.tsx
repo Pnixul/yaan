@@ -310,11 +310,12 @@ export default function NeighborhoodMap({
       ? 0
       : 550;
     if (points.length > 1) {
-      const small = (container.current?.clientHeight ?? 0) < 500;
+      const height = container.current?.clientHeight ?? 500;
+      const small = height < 500;
       mapRef.current?.fitBounds(bounds, {
         padding: {
-          top: small ? 145 : 190,
-          bottom: small ? 100 : 125,
+          top: small ? Math.min(reference ? 160 : 115, height * 0.43) : 190,
+          bottom: small ? Math.min(140, height * 0.34) : 125,
           left: 55,
           right: 75,
         },

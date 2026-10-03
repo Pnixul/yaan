@@ -20,6 +20,24 @@ The exact screens and interactions may evolve, but this journey should remain si
 
 ---
 
+## Home and Navigation
+
+### Home and Entry into Explore
+
+Home answers what YAAN is and what the user can do through a concise introduction and prominent location search. Example neighbourhood links provide a quick alternative to typing. A short explanation of everyday places, approximate journeys, and area history follows; no long marketing journey is required.
+
+Home and Explore share the same mock search. Selecting an area opens Explore focused on that area, without a reference place. Selecting a specific place opens its details in Explore; the user then chooses “Explore around this place” to establish the reference. The selected fixture ID travels in the URL, so refreshing the entry link retains that intent. Invalid IDs fall back to the default sample Explore state. Subsequent exploration remains local component state; this prototype does not persist a whole session or personal history.
+
+### App Navigation
+
+Home, Explore, Saved, and Account are directly accessible in a labelled bottom navigation bar on mobile, without a hamburger menu. Tablet and desktop use lightweight header links. The active destination has a visible selected state and an accessible current-page label.
+
+Reserve space for the mobile navigation and safe-area inset: it must not cover document content, map attribution, or the location sheet. Keep the existing map and sheet interaction model, with adjustments for short screens. Search suggestions must remain reachable above navigation.
+
+Saved and Account are intentionally minimal planned-feature placeholders, with a link back to Explore. There is no saving, sign-in, account management, or authentication gate in the prototype.
+
+---
+
 ## Map-First Experience
 
 The map provides spatial context and should be a major part of the experience.
