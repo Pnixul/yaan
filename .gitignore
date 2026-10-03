@@ -1,0 +1,14 @@
+/node_modules/
+/public/maplibre/
+/.next/
+/out/
+/build/
+/coverage/
+/.vercel/
+.env*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+.DS_Store
+Thumbs.db
