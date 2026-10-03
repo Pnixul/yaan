@@ -14,7 +14,7 @@ Users should not need to understand flood datasets, risk models, or technical te
 
 The primary journey is:
 
-**Discover or search → Select a place → Understand the area → Explore details → Take a useful action**
+**Search an area or location → Explore the map → Choose a reference place → Filter nearby essentials → Inspect a place and approximate journey → Preview a route → Explore area conditions and history**
 
 The exact screens and interactions may evolve, but this journey should remain simple and recognizable.
 
@@ -51,6 +51,18 @@ Current location may be offered as a shortcut, but the experience must never ass
 
 Search should remain a primary method of selecting a location.
 
+Area results focus the map without silently becoming a specific reference point. Specific places can be inspected from search, a list, or a map marker, then intentionally chosen with an “Explore around this place” action.
+
+Keep the reference visible in the panel and as a distinct map marker. Selecting a nearby destination does not replace it. Changing areas clears the old reference; choosing a new reference resets nearby selections and route previews.
+
+## Everyday Context
+
+Present a curated set of everyday places initially, with compact category controls associated with the map. Show one category at a time to limit clutter. Food, transport, shopping, health, education, parks, and attractions support understanding life around the reference location.
+
+Nearby place details show the name, category, a useful short description, approximate distance, and approximate journey times. Directions opens a route preview in the same map experience with a clear origin, destination, and return to exploration. These are not full place pages or navigation instructions.
+
+In the core exploration prototype, the existing persistent desktop panel offers Nearby and Area context views. Flood summary and history sit within Area context. Retain the mobile bottom-sheet structure and horizontal category controls without introducing a separate mobile journey.
+
 ---
 
 ## Information Hierarchy
@@ -61,9 +73,11 @@ Information should be presented in layers.
 
 Answer the most important question quickly:
 
-> What should I know about this area?
+> What would daily life around this selected location be like?
 
 Use concise language and a small number of meaningful indicators.
+
+Prioritize the selected reference location, then nearby everyday context, then conditions and history. Preserve the reference while users move between nearby places and area context.
 
 ### Second Layer — Context
 

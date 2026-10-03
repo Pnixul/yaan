@@ -1,17 +1,25 @@
 "use client";
-
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useState } from "react";
-import { ArrowUpRight, FlaskConical, MapPin, Waves } from "lucide-react";
+import { useCallback, useMemo, useReducer, useState } from "react";
+import { ArrowUpRight, FlaskConical, MapPin, Waves, X } from "lucide-react";
 import { LocationSearch } from "@/components/location-search";
 import { LocationResult } from "@/components/location-result";
+import { FloodContext } from "@/components/flood-context";
+import { NearbyContext } from "@/components/nearby-context";
+import { CategoryControls } from "@/components/category-controls";
+import { MOCK_AREAS, type MockReport } from "@/lib/mock-locations";
 import {
-  MOCK_LOCATIONS,
-  type MockLocation,
-  type MockReport,
-} from "@/lib/mock-locations";
-
+  MOCK_PLACES,
+  nearbyPlaces,
+  type MockPlace,
+  type SearchResult,
+} from "@/lib/mock-places";
+import { buildMockRoute } from "@/lib/mock-routes";
+import {
+  explorationReducer,
+  initialExploration,
+} from "@/lib/exploration-state";
 const NeighborhoodMap = dynamic(() => import("@/components/neighborhood-map"), {
   ssr: false,
   loading: () => (
@@ -21,33 +29,62 @@ const NeighborhoodMap = dynamic(() => import("@/components/neighborhood-map"), {
     </div>
   ),
 });
-
 export function MapExperience() {
-  const [location, setLocation] = useState(MOCK_LOCATIONS[0]);
+  const [state, dispatch] = useReducer(explorationReducer, initialExploration);
   const [expanded, setExpanded] = useState(false);
-  const [details, setDetails] = useState(false);
-  const [selectedReport, setSelectedReport] = useState<MockReport | null>(null);
   const [showReports, setShowReports] = useState(true);
-  const [selection, setSelection] = useState(0);
-
-  function select(location: MockLocation) {
-    setLocation(location);
-    setSelectedReport(null);
-    setDetails(false);
-    setExpanded(false);
-    setSelection((value) => value + 1);
-  }
-
-  const openReport = useCallback((report: MockReport) => {
-    setSelectedReport(report);
-    setDetails(true);
+  const area = MOCK_AREAS.find((item) => item.id === state.areaId)!;
+  const reference =
+    MOCK_PLACES.find((item) => item.id === state.referenceId) ?? null;
+  const selected =
+    MOCK_PLACES.find((item) => item.id === state.placeId) ?? null;
+  const places = useMemo(
+    () =>
+      reference
+        ? nearbyPlaces(area.id, reference.id, state.category)
+        : MOCK_PLACES.filter(
+            (place) => place.areaId === area.id && place.suggestedReference,
+          ),
+    [area.id, reference, state.category],
+  );
+  const mapPlaces = useMemo(
+    () =>
+      state.view === "conditions"
+        ? []
+        : state.routing && selected
+          ? [selected]
+          : selected &&
+              selected.id !== reference?.id &&
+              !places.some((place) => place.id === selected.id)
+            ? [...places, selected]
+            : places,
+    [state.view, state.routing, selected, reference, places],
+  );
+  const route = useMemo(
+    () => (reference && selected ? buildMockRoute(reference, selected) : null),
+    [reference, selected],
+  );
+  const inspect = useCallback((place: MockPlace) => {
+    dispatch({ type: "inspect", place });
     setExpanded(true);
   }, []);
-
+  const openReport = useCallback((report: MockReport) => {
+    dispatch({ type: "report", report });
+    setExpanded(true);
+  }, []);
+  function search(result: SearchResult) {
+    if (result.kind === "area") {
+      dispatch({ type: "area", id: result.id });
+      setExpanded(false);
+    } else {
+      const place = MOCK_PLACES.find((item) => item.id === result.id);
+      if (place) inspect(place);
+    }
+  }
   return (
     <main className="yaan-app">
       <a href="#area-summary" className="skip-link">
-        Skip to area summary
+        Skip to location details
       </a>
       <header className="app-header">
         <Link className="brand" href="/" aria-label="YAAN home">
@@ -65,79 +102,188 @@ export function MapExperience() {
           </span>
           <span className="prototype-badge">
             <FlaskConical size={14} />
-            <span>Visual prototype</span>
+            <span>Exploration prototype</span>
           </span>
         </div>
       </header>
       <div className="explore-layout">
         <LocationResult
-          key={location.id}
-          location={location}
+          area={area}
+          reference={reference}
           expanded={expanded}
-          details={details}
-          selectedReport={selectedReport}
-          onExpand={() => {
-            setExpanded(!expanded);
-            if (expanded) setDetails(false);
+          view={state.view}
+          contentKey={[
+            area.id,
+            reference?.id,
+            selected?.id,
+            state.view,
+            state.history,
+            state.routing,
+          ].join(":")}
+          onExpand={() => setExpanded(!expanded)}
+          onView={(view) => {
+            dispatch({ type: "view", view });
+            setExpanded(true);
           }}
-          onDetails={(show) => {
-            setDetails(show);
-            if (show) setExpanded(true);
+          onChangeReference={() => {
+            dispatch({ type: "area", id: area.id });
+            setExpanded(false);
           }}
-          onReport={openReport}
-        />
+        >
+          {state.view === "conditions" ? (
+            <>
+              <div className="condition-heading">
+                <span className="eyebrow">Area context</span>
+                <h2>Flood history</h2>
+                <p>
+                  Around {area.name}. Area-level evidence, not a building
+                  assessment.
+                </p>
+              </div>
+              <FloodContext
+                location={area}
+                details={state.history}
+                selectedReport={state.report}
+                onDetails={(show) => {
+                  dispatch({ type: "history", show });
+                  setExpanded(true);
+                }}
+                onReport={openReport}
+              />
+            </>
+          ) : (
+            <NearbyContext
+              reference={reference}
+              selected={selected}
+              places={places}
+              category={state.category}
+              route={route}
+              routing={state.routing}
+              onSelect={inspect}
+              onReference={(place) => {
+                dispatch({ type: "reference", place });
+                setExpanded(false);
+              }}
+              onDirections={() => {
+                dispatch({ type: "route" });
+                setExpanded(false);
+              }}
+              onClearRoute={() => dispatch({ type: "clear-route" })}
+              onClose={() => {
+                dispatch({ type: "close-place" });
+                setExpanded(false);
+              }}
+            />
+          )}
+        </LocationResult>
         <section
           className="map-section"
           aria-label="Explore Bangkok neighbourhoods"
         >
           <NeighborhoodMap
-            location={location}
-            selectedReport={selectedReport}
-            showReports={showReports}
-            selection={selection}
+            location={area}
+            reference={reference}
+            places={mapPlaces}
+            selectedPlace={selected}
+            route={state.routing ? route : null}
+            conditions={state.view === "conditions"}
+            selectedReport={state.report}
+            showReports={state.view === "conditions" && showReports}
+            selection={state.cameraRevision}
             onReport={openReport}
+            onPlace={inspect}
           />
-          <div className="map-top">
+          <div className="map-top exploration-map-top">
             <LocationSearch
-              onSelect={select}
-              onOpen={() => {
-                setExpanded(false);
-                setDetails(false);
-              }}
+              onSelect={search}
+              onOpen={() => setExpanded(false)}
             />
-            <div className="map-intro">
-              <span className="eyebrow">A closer look at Bangkok</span>
-              <p>
-                Find a place.
-                <br />
-                <span>Get to know its surroundings.</span>
-              </p>
-            </div>
+            {reference && state.view === "nearby" ? (
+              <CategoryControls
+                selected={state.category}
+                onChange={(category) => {
+                  dispatch({ type: "category", category });
+                  setExpanded(false);
+                }}
+              />
+            ) : (
+              <div className="map-intro">
+                <span className="eyebrow">
+                  {state.view === "conditions"
+                    ? "One part of the bigger picture"
+                    : "A closer look at Bangkok"}
+                </span>
+                <p>
+                  {state.view === "conditions"
+                    ? "The area’s history."
+                    : "Where will your day begin?"}
+                  <br />
+                  <span>
+                    {state.view === "conditions"
+                      ? "Context, not a prediction."
+                      : "Choose a place to explore around."}
+                  </span>
+                </p>
+              </div>
+            )}
           </div>
           <div className="map-legend">
-            <span className="legend-area" />
-            <span>Illustrative area</span>
-            <span className="legend-divider" />
-            <button
-              aria-pressed={showReports}
-              onClick={() => setShowReports(!showReports)}
-            >
-              <span
-                className={`legend-dot${showReports ? "" : " is-hidden"}`}
-              />
-              Mock reports
-              <span className="legend-count">{location.reports.length}</span>
-            </button>
+            {state.view === "conditions" ? (
+              <>
+                <span className="legend-area" />
+                <span>Illustrative area</span>
+                <span className="legend-divider" />
+                <button
+                  aria-pressed={showReports}
+                  onClick={() => setShowReports(!showReports)}
+                >
+                  <span
+                    className={`legend-dot${showReports ? "" : " is-hidden"}`}
+                  />
+                  Mock reports{" "}
+                  <span className="legend-count">{area.reports.length}</span>
+                </button>
+              </>
+            ) : state.routing && route ? (
+              <>
+                <span className="legend-route" />
+                <span>Mock route · ~{route.walkMinutes} min walk</span>
+                <span className="legend-divider" />
+                <button
+                  aria-label="Clear route preview"
+                  onClick={() => dispatch({ type: "clear-route" })}
+                >
+                  <X size={14} /> Clear
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="legend-reference" />
+                <span>{reference ? "Your reference" : "Sample places"}</span>
+                <span className="legend-divider" />
+                <span
+                  className={state.routing ? "legend-route" : "legend-poi"}
+                />
+                <span>
+                  {state.routing ? "Mock walking route" : "Everyday places"}
+                </span>
+              </>
+            )}
           </div>
           <div className="map-caption">
             <ArrowUpRight size={15} />
-            <span>Explore freely. Start with a neighbourhood.</span>
+            <span>Places, journeys & area context · All sample data</span>
           </div>
         </section>
       </div>
       <div className="sr-only" role="status">
-        Selected {location.name}, {location.district}. {location.category}. Mock
-        data only.
+        {reference
+          ? `Exploring around ${reference.name}.`
+          : `Exploring ${area.name}. Choose a reference place.`}{" "}
+        {state.view === "nearby"
+          ? `${places.length} sample places.`
+          : "Mock flood context."}{" "}
+        {state.routing && selected ? `Route preview to ${selected.name}.` : ""}
       </div>
     </main>
   );

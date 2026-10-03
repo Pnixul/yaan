@@ -3,12 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import {
   AttributionControl,
+  LngLatBounds,
   Map,
   Marker,
   setWorkerUrl,
   type GeoJSONSource,
 } from "maplibre-gl";
-import type { Feature, Polygon } from "geojson";
+import type { Feature, FeatureCollection, LineString, Polygon } from "geojson";
 import {
   Compass,
   LocateFixed,
@@ -19,15 +20,23 @@ import {
 } from "lucide-react";
 import { DEMO_MAP_STYLE } from "@/lib/map-config";
 import {
-  MOCK_LOCATIONS,
+  MOCK_AREAS,
   formatReportDate,
-  type MockLocation,
+  type MockArea,
   type MockReport,
 } from "@/lib/mock-locations";
 import "maplibre-gl/dist/maplibre-gl.css";
+import type { MockPlace } from "@/lib/mock-places";
+import type { MockRoute } from "@/lib/mock-routes";
 
 type Props = {
-  location: MockLocation;
+  location: MockArea;
+  reference: MockPlace | null;
+  places: MockPlace[];
+  selectedPlace: MockPlace | null;
+  route: MockRoute | null;
+  conditions: boolean;
+  onPlace: (place: MockPlace) => void;
   selectedReport: MockReport | null;
   showReports: boolean;
   selection: number;
@@ -36,6 +45,12 @@ type Props = {
 
 export default function NeighborhoodMap({
   location,
+  reference,
+  places,
+  selectedPlace,
+  route,
+  conditions,
+  onPlace,
   selectedReport,
   showReports,
   selection,
@@ -59,7 +74,7 @@ export default function NeighborhoodMap({
       map = new Map({
         container: container.current,
         style: DEMO_MAP_STYLE,
-        center: MOCK_LOCATIONS[0].coordinates,
+        center: MOCK_AREAS.find((area) => area.id === "ari")!.coordinates,
         zoom: container.current.clientWidth < 600 ? 13.65 : 14.4,
         minZoom: 10,
         maxZoom: 18,
@@ -131,21 +146,50 @@ export default function NeighborhoodMap({
         },
       });
     }
+    map.setLayoutProperty(
+      "area-fill",
+      "visibility",
+      conditions ? "visible" : "none",
+    );
+    map.setLayoutProperty(
+      "area-border",
+      "visibility",
+      conditions ? "visible" : "none",
+    );
+  }, [ready, location, conditions]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map || !reference) return;
     const selected = document.createElement("div");
     selected.className = "place-marker";
     const pin = document.createElement("span");
     pin.className = "place-marker-pin";
     const label = document.createElement("span");
     label.className = "place-marker-label";
-    label.textContent = location.name;
+    label.textContent = "Your reference";
     selected.append(pin, label);
     selected.setAttribute("role", "img");
-    selected.setAttribute("aria-label", `Selected place: ${location.place}`);
-    const markers = [
-      new Marker({ element: selected, anchor: "bottom", offset: [0, -6] })
-        .setLngLat(location.coordinates)
-        .addTo(map),
-    ];
+    selected.setAttribute(
+      "aria-label",
+      `Reference location: ${reference.name}`,
+    );
+    const marker = new Marker({
+      element: selected,
+      anchor: "bottom",
+      offset: [0, -6],
+    })
+      .setLngLat(reference.coordinates)
+      .addTo(map);
+    return () => {
+      marker.remove();
+    };
+  }, [ready, reference]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    const markers: Marker[] = [];
     if (showReports) {
       for (const report of location.reports) {
         const element = document.createElement("button");
@@ -169,6 +213,76 @@ export default function NeighborhoodMap({
   }, [ready, location, showReports, onReport]);
 
   useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map) return;
+    const markers = places.map((place, index) => {
+      const element = document.createElement("button");
+      element.className = "poi-marker";
+      element.type = "button";
+      element.dataset.placeId = place.id;
+      element.setAttribute("aria-label", `Explore ${place.name}`);
+      element.title = place.name;
+      const pin = document.createElement("span");
+      pin.className = "poi-marker-pin";
+      pin.textContent = String(index + 1);
+      const label = document.createElement("span");
+      label.className = "poi-marker-label";
+      label.textContent = place.name;
+      element.append(pin, label);
+      element.addEventListener("click", () => onPlace(place));
+      return new Marker({ element }).setLngLat(place.coordinates).addTo(map);
+    });
+    return () => markers.forEach((marker) => marker.remove());
+  }, [ready, places, onPlace]);
+
+  useEffect(() => {
+    mapRef.current
+      ?.getContainer()
+      .querySelectorAll<HTMLButtonElement>(".poi-marker")
+      .forEach((marker) => {
+        const selected = marker.dataset.placeId === selectedPlace?.id;
+        marker.classList.toggle("is-selected", selected);
+        marker.setAttribute("aria-pressed", String(selected));
+      });
+  }, [ready, places, selectedPlace]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!ready || !map?.getStyle()?.layers) return;
+    const data: FeatureCollection<LineString> = {
+      type: "FeatureCollection",
+      features: route
+        ? [
+            {
+              type: "Feature",
+              properties: {},
+              geometry: { type: "LineString", coordinates: route.coordinates },
+            },
+          ]
+        : [],
+    };
+    const source = map.getSource("mock-route") as GeoJSONSource | undefined;
+    if (source) source.setData(data);
+    else {
+      map.addSource("mock-route", { type: "geojson", data });
+      map.addLayer({
+        id: "route-casing",
+        type: "line",
+        source: "mock-route",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: { "line-color": "#ffffff", "line-width": 8 },
+      });
+      map.addLayer({
+        id: "route-line",
+        type: "line",
+        source: "mock-route",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: { "line-color": "#24585d", "line-width": 4 },
+      });
+    }
+  }, [ready, route]);
+
+  useEffect(() => {
     mapRef.current
       ?.getContainer()
       .querySelectorAll<HTMLButtonElement>(".report-marker")
@@ -181,18 +295,43 @@ export default function NeighborhoodMap({
 
   useEffect(() => {
     if (!ready) return;
-    mapRef.current?.easeTo({
-      center: location.coordinates,
-      zoom: (container.current?.clientWidth ?? 0) < 600 ? 13.65 : 14.4,
-      duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? 0
-        : 650,
-    });
-  }, [location, selection, ready]);
+    const points =
+      route?.coordinates ??
+      (conditions
+        ? location.illustration
+        : [
+            ...(reference ? [reference.coordinates] : []),
+            ...places.map((place) => place.coordinates),
+          ]);
+    const bounds = new LngLatBounds();
+    points.forEach((point) => bounds.extend(point));
+    const duration = window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches
+      ? 0
+      : 550;
+    if (points.length > 1) {
+      const small = (container.current?.clientHeight ?? 0) < 500;
+      mapRef.current?.fitBounds(bounds, {
+        padding: {
+          top: small ? 145 : 190,
+          bottom: small ? 100 : 125,
+          left: 55,
+          right: 75,
+        },
+        maxZoom: 16,
+        duration,
+      });
+    } else
+      mapRef.current?.easeTo({
+        center: reference?.coordinates ?? location.coordinates,
+        zoom: 14.4,
+        duration,
+      });
+  }, [location, reference, places, conditions, route, selection, ready]);
 
   function recenter() {
     mapRef.current?.easeTo({
-      center: location.coordinates,
+      center: reference?.coordinates ?? location.coordinates,
       zoom: (container.current?.clientWidth ?? 0) < 600 ? 13.65 : 14.4,
       bearing: 0,
       duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -253,8 +392,8 @@ export default function NeighborhoodMap({
         </div>
         <button
           className="recenter-control"
-          aria-label={`Recenter on ${location.name}`}
-          title={`Recenter on ${location.name}`}
+          aria-label={`Recenter on ${reference?.name ?? location.name}`}
+          title={`Recenter on ${reference?.name ?? location.name}`}
           disabled={status !== "ready"}
           onClick={recenter}
         >

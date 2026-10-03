@@ -1,27 +1,32 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, MapPin, Search, X } from "lucide-react";
-import { MOCK_LOCATIONS, type MockLocation } from "@/lib/mock-locations";
+import { searchLocations, type SearchResult } from "@/lib/mock-places";
 
 export function LocationSearch({
   onSelect,
   onOpen,
 }: {
-  onSelect: (location: MockLocation) => void;
+  onSelect: (location: SearchResult) => void;
   onOpen: () => void;
 }) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const input = useRef<HTMLInputElement>(null);
-  const matches = MOCK_LOCATIONS.filter((location) =>
-    `${location.name} ${location.thaiName} ${location.district} ${location.place} Bangkok กรุงเทพมหานคร`
-      .toLowerCase()
-      .includes(query.trim().toLowerCase()),
-  );
+  const matches = searchLocations(query);
+  const activeId = matches[active]?.id;
 
-  function select(location: MockLocation) {
+  useEffect(() => {
+    if (open && activeId) {
+      document.getElementById(`option-${activeId}`)?.scrollIntoView({
+        block: "nearest",
+      });
+    }
+  }, [open, activeId]);
+
+  function select(location: SearchResult) {
     onSelect(location);
     setQuery("");
     setOpen(false);
@@ -57,7 +62,7 @@ export function LocationSearch({
             open && active >= 0 ? `option-${matches[active]?.id}` : undefined
           }
           autoComplete="off"
-          placeholder="Find your neighbourhood"
+          placeholder="Find an area or a place"
           value={query}
           onFocus={() => {
             setOpen(true);
@@ -113,7 +118,7 @@ export function LocationSearch({
       </form>
       {open && (
         <div className="search-results">
-          <p className="eyebrow">Explore a demo neighbourhood</p>
+          <p className="eyebrow">Areas & places</p>
           <ul id="location-options" role="listbox" aria-label="Demo locations">
             {matches.map((location, index) => (
               <li key={location.id} role="presentation">
@@ -133,7 +138,9 @@ export function LocationSearch({
                     <strong>
                       {location.name} <span lang="th">{location.thaiName}</span>
                     </strong>
-                    <small>{location.district}, Bangkok</small>
+                    <small>
+                      {location.typeLabel} · {location.subtitle}
+                    </small>
                   </span>
                   <ArrowUpRight size={18} aria-hidden="true" />
                 </button>
@@ -142,11 +149,11 @@ export function LocationSearch({
           </ul>
           {!matches.length && (
             <p className="search-empty" role="status">
-              No demo places match. Try Ari, Thong Lo, or Silom.
+              No demo places match. Try Ari, Thong Lo, or Lat Krabang.
             </p>
           )}
           <p className="search-footnote">
-            3 sample places · Search stays on this device
+            Sample locations · Search stays on this device
           </p>
         </div>
       )}

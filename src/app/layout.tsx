@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "YAAN — Get to know the neighbourhood",
   description:
-    "A map-first visual prototype for understanding the area around a place. All flood information is fictional sample data.",
+    "Explore everyday places, journeys, and area context around a reference location. A map-first prototype using illustrative sample data.",
 };
 
 export default function RootLayout({

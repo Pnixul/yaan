@@ -5,7 +5,7 @@ export type MockReport = {
   coordinates: [number, number];
 };
 
-export type MockLocation = {
+export type MockArea = {
   id: string;
   name: string;
   thaiName: string;
@@ -21,7 +21,27 @@ export type MockLocation = {
 // Entirely fictional fixtures for evaluating the interface. Categories are
 // editorial examples, not calculated scores. Polygons are illustrative shapes,
 // not validated analysis boundaries, flood extents, or a geographic radius.
-export const MOCK_LOCATIONS: MockLocation[] = [
+export const MOCK_AREAS: MockArea[] = [
+  {
+    id: "lat-krabang",
+    name: "Lat Krabang",
+    thaiName: "ลาดกระบัง",
+    district: "Lat Krabang",
+    place: "KMITL main entrance",
+    coordinates: [100.7788, 13.7274],
+    category: "Insufficient information",
+    explanation:
+      "This sample has no flood records for the area. Missing information is not evidence of low risk.",
+    reports: [],
+    illustration: [
+      [100.77, 13.733],
+      [100.781, 13.735],
+      [100.787, 13.729],
+      [100.783, 13.722],
+      [100.771, 13.722],
+      [100.77, 13.733],
+    ],
+  },
   {
     id: "ari",
     name: "Ari",

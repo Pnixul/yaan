@@ -2,7 +2,7 @@
 
 ## Purpose
 
-YAAN uses location-related data to help users understand historical flood conditions around a place.
+YAAN uses location-related data to help users understand everyday surroundings, approximate journeys, and area conditions around a reference place. Flood history is the first demonstrated condition.
 
 Data should support informed decisions without creating a false sense of precision or certainty.
 
@@ -13,6 +13,18 @@ Specific datasets, formulas, thresholds, and implementation details may evolve a
 ---
 
 ## Core Data Principle
+
+### Prototype Places and Journeys
+
+The core exploration prototype uses local mock areas, places, categories, flood records, and route geometry. Sample place names and coordinates are illustrative, not a verified POI directory. Do not imply verified opening hours, access, services, or recommendations.
+
+Reference locations and nearby destinations are distinct roles; any sample place can become a reference. Distances and times must follow the current origin and destination and be cleared when those selections change.
+
+Mock route previews use hand-authored street corridors and access paths. Display distance is the length of that illustrative geometry. Walking and driving durations use simple display-only assumptions, without traffic or timetable data. Label routes and estimates as mocked and unverified, not usable navigation guidance. These assumptions are not a production routing methodology or flood-risk model.
+
+The shaded flood-context shape remains illustrative, with no validated analysis radius or flood extent. No mock category or missing sample records establish a real-world condition.
+
+### Area Evidence
 
 YAAN should communicate:
 

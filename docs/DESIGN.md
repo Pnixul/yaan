@@ -87,6 +87,8 @@ Avoid covering most of the map unless the user intentionally enters a detail-foc
 
 Every view should have a clear primary purpose.
 
+For core location exploration, prioritize the reference place, nearby everyday context, then area conditions and history. Extend the existing calm editorial panel and muted map rather than changing the composition. Compact horizontal category controls belong with the map; POIs use restrained markers distinct from the reference pin and warm flood-report dots.
+
 For risk-related views, prioritize:
 
 1. location identity;

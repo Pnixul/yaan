@@ -6,15 +6,13 @@ YAAN helps people understand an area before deciding to live, move, or regularly
 
 Instead of requiring users to search through multiple sources and interpret complex location data themselves, YAAN turns relevant evidence into information that is quick and easy to understand.
 
-The initial focus is **historical flood information and flood-related risk in Bangkok, Thailand**.
+The initial prototype focuses on **core location exploration in Bangkok, Thailand**: nearby everyday essentials, approximate journeys, and area context. Flood history is the first demonstrated area condition, not the whole product.
 
 ---
 
 ## Problem
 
-When choosing a place to live, people can easily find information such as price, distance, transportation, and nearby facilities.
-
-However, understanding location-related risks is more difficult.
+When choosing where to live, work, study, or spend daily life, people often need separate searches for nearby essentials, routes, distances, and area conditions.
 
 Information may be scattered across different sources, difficult to interpret, focused only on current conditions, or disconnected from the specific place a user is considering.
 
@@ -28,7 +26,7 @@ YAAN starts with a **place**, not a data dashboard.
 
 The core experience should remain simple:
 
-**Find a place → Understand the surrounding area → Explore supporting evidence when needed**
+**Search an area or place → Choose a reference location → Explore nearby essentials → Understand approximate journeys → Inspect area context**
 
 A user may search for a residence, workplace, school, point of interest, or another location they want to understand.
 
@@ -41,6 +39,8 @@ Users do not need to be physically present at the location they are exploring.
 ### Location First
 
 The location the user cares about is the starting point of the experience.
+
+A home, office, university, station, or another specific place can be the reference location. YAAN is not accommodation-first. Nearby places and routes help answer what daily life around that reference could be like; they are not standalone directories or recommendations.
 
 Maps and spatial information should help users understand that location rather than becoming the product itself.
 
@@ -99,9 +99,14 @@ Specific features and interface implementations may evolve without changing the 
 
 ## Initial Focus
 
-YAAN initially focuses on:
+YAAN initially demonstrates location exploration in Bangkok through realistic mock places and client-side interactions. The product hierarchy is:
 
-**Flood-related information in Bangkok, Thailand.**
+1. selected reference location;
+2. nearby everyday context;
+3. area conditions and history;
+4. supporting map information.
+
+Search distinguishes neighbourhoods from specific places. Category filters, compact place details, and in-product route previews support exploration. Flood history remains the first fully demonstrated condition.
 
 Historical flood data may be used to help users understand patterns around a selected location.
 
@@ -139,6 +144,8 @@ Detailed data sources, methodology, limitations, analysis rules, and risk calcul
 
 YAAN is not intended to become a general-purpose replacement for map or navigation products.
 
+YAAN is not a booking platform or property marketplace. The core exploration prototype does not include authentication, saved places, reviews, posting, comparisons, recommendations, or personalization. Route previews provide location context rather than turn-by-turn navigation.
+
 Features should support the goal of understanding a location rather than reproducing unrelated map functionality.
 
 Avoid adding complexity that does not meaningfully improve the user's ability to understand or evaluate an area.
@@ -149,7 +156,7 @@ AI should only be introduced when it provides clear value to the core experience
 
 ## Long-Term Direction
 
-The product architecture should allow YAAN to expand beyond flooding if future research and reliable data support additional location-related information.
+The product architecture should allow area context to expand beyond flooding if future research and reliable data support additional location-related information.
 
 Possible future areas may include other environmental or local risks.
 

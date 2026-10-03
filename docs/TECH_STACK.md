@@ -164,6 +164,10 @@ Do not send an entire raw flood dataset to the browser when only a small geograp
 
 ## Application Architecture
 
+The core location exploration prototype runs client-side with local typed fixtures. Keep areas and flood history, specific places and categories, mock route geometry, and interaction state separate from presentation components. The reference location is the origin for nearby distances and route previews.
+
+Use the existing MapLibre basemap and worker setup. No geocoding, POI, routing, database, or authentication integration is required for this prototype. Supabase and provider guidance elsewhere in this document describes future integration direction, not a requirement to install them now.
+
 Prefer clear separation between:
 
 - UI components;
