@@ -34,7 +34,7 @@ Home, Explore, Saved, and Account are directly accessible in a labelled bottom n
 
 Reserve space for the mobile navigation and safe-area inset: it must not cover document content, map attribution, or the location sheet. Keep the existing map and sheet interaction model, with adjustments for short screens. Search suggestions must remain reachable above navigation.
 
-Saved and Account are intentionally minimal planned-feature placeholders, with a link back to Explore. There is no saving, sign-in, account management, or authentication gate in the prototype.
+Saved offers a local prototype list with links back to Explore. Account remains a planned-feature placeholder. There is no sign-in, account management, or authentication gate in the prototype.
 
 ---
 
@@ -148,7 +148,7 @@ Authentication should not block the core exploration experience.
 
 Users should be able to search locations and understand basic area information without signing in.
 
-Ask users to authenticate only when an action requires persistent personal data, such as saving or organizing locations.
+In future account-backed flows, ask users to authenticate only when an action requires persistent personal data, such as saving or organizing locations. The current Saved Places prototype uses browser-local storage without authentication.
 
 Authentication should feel like an extension of the experience, not an entry barrier.
 
@@ -156,7 +156,9 @@ Authentication should feel like an extension of the experience, not an entry bar
 
 ## Saved Places
 
-When personal location features are available, saved places should help users continue a real decision-making process.
+Saved Places currently supports saving and unsaving from Explore place details, with an immediate visible bookmark state. The local list prevents duplicate entries, survives normal navigation and reload in the same browser, and does not sync to an account or another device. Clearing browser data removes it. If browser storage is unavailable, show that changes last for the current session only.
+
+The Saved page lists name, category, and area using existing mock data. It deliberately omits journey estimates because the list has no shared reference location. Selecting a saved place uses the existing specific-place Explore entry; it opens inspection without silently establishing a reference. Unsave removes the row, announces the change, and moves keyboard focus to the next available removal action or the empty-state heading. The empty state explains how to save and links back to Explore.
 
 The experience should make it easy to return to places the user is considering without repeatedly searching for them.
 

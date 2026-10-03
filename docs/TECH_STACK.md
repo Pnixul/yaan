@@ -164,7 +164,9 @@ Do not send an entire raw flood dataset to the browser when only a small geograp
 
 ## Application Architecture
 
-The App Router exposes Home at `/`, Explore at `/explore`, and minimal planned-feature placeholders at `/saved` and `/account`. A shared layout owns the responsive primary navigation. Home content stays server-rendered, with small client components for search and active navigation; MapLibre remains confined to Explore.
+The App Router exposes Home at `/`, Explore at `/explore`, local Saved Places at `/saved`, and a minimal planned-feature placeholder at `/account`. A shared layout owns the responsive primary navigation. Home content stays server-rendered, with small client components for search and active navigation; MapLibre remains confined to Explore.
+
+The Saved Places prototype stores only known mock place IDs in localStorage under `yaan.saved-places`. Its isolated client store exposes saved IDs, readiness, storage availability, and toggle/remove operations to the UI. Validate and deduplicate stored values, ignore unknown IDs, use a stable empty snapshot during server rendering, and listen for storage changes from other tabs. Storage failures retain an in-memory list with a visible session-only notice. This is not authenticated or server persistence; future Supabase integration should replace this state boundary without changing the list or bookmark interaction model.
 
 Home links carry an `area` or `place` fixture ID in Explore's query parameters. Resolve those IDs against known mock data before initializing the existing exploration reducer, and ignore unknown values. A specific-place entry opens inspection without silently choosing a reference. Entry URLs preserve selection intent on reload; subsequent map state is not persisted or synchronized to the URL. No authentication, storage, or new provider is needed for this flow.
 

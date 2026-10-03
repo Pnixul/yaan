@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { categoryIcons } from "@/components/category-controls";
+import { SavePlaceButton } from "@/components/save-place-button";
 import {
   categoryLabel,
   CATEGORIES,
@@ -60,10 +61,13 @@ export function NearbyContext({
     const isReference = selected.id === reference?.id;
     return (
       <section className="nearby-detail">
-        <button className="text-button" onClick={onClose}>
-          <ArrowLeft size={16} />
-          {reference ? "Back to nearby" : "Back to area"}
-        </button>
+        <div className="place-detail-toolbar">
+          <button className="text-button" onClick={onClose}>
+            <ArrowLeft size={16} />
+            {reference ? "Back to nearby" : "Back to area"}
+          </button>
+          <SavePlaceButton key={selected.id} place={selected} />
+        </div>
         <div className="place-detail-category">
           <Icon size={20} />
           <span>{categoryLabel(selected.category)}</span>

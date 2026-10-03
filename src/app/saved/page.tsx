@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { PlannedDestination } from "@/components/planned-destination";
+import { SavedPlaces } from "@/components/saved-places";
+import "./saved.css";
 export const metadata: Metadata = { title: "Saved places — YAAN" };
 export default function Saved() {
-  return <PlannedDestination kind="saved" />;
+  return <SavedPlaces />;
 }
