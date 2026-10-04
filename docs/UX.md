@@ -34,7 +34,7 @@ Home, Explore, Saved, and Account are directly accessible in a labelled bottom n
 
 Reserve space for the mobile navigation and safe-area inset: it must not cover document content, map attribution, or the location sheet. Keep the existing map and sheet interaction model, with adjustments for short screens. Search suggestions must remain reachable above navigation.
 
-Saved offers a local prototype list with links back to Explore. Account remains a planned-feature placeholder. There is no sign-in, account management, or authentication gate in the prototype.
+Saved offers account-owned or browser-local guest lists with links back to Explore. Account offers sign in and sign up without introducing an authentication gate elsewhere.
 
 ---
 
@@ -148,15 +148,23 @@ Authentication should not block the core exploration experience.
 
 Users should be able to search locations and understand basic area information without signing in.
 
-In future account-backed flows, ask users to authenticate only when an action requires persistent personal data, such as saving or organizing locations. The current Saved Places prototype uses browser-local storage without authentication.
+Account Saved Places requires authentication; the guest Save experience remains available using browser-local storage. Guest and account lists are kept separate, without automatic import.
 
-Authentication should feel like an extension of the experience, not an entry barrier.
+Account uses labelled email/password controls with sign-in and sign-up choices, pending feedback, native validation, and understandable server errors. While identity is resolving, show a checking state rather than a signed-out form. If account services cannot be reached, show a retry state rather than claiming the user has signed out.
+
+When Supabase requires email confirmation, explain that the user is not signed in yet and should check their inbox. Do not claim that a new account was created or an email delivered when Supabase deliberately obscures an existing account. A valid confirmation link establishes the session and returns to Account; an invalid or expired link provides recovery guidance. If confirmation is disabled in the project, a successful registration with a session goes directly to signed-in Account.
+
+Signed-in Account shows the verified email and Sign out. Sign out applies to this browser session. Account explains that signed-in saves are account-owned and guest saves remain separate in this browser. Missing deployment configuration leaves exploration and local Saved available with a concise account-unavailable state.
+
+Authentication should feel like an extension of the experience, not an entry barrier. Profile editing, password reset, OAuth, account deletion, and guest-to-account import remain deferred.
 
 ---
 
 ## Saved Places
 
-Saved Places currently supports saving and unsaving from Explore place details, with an immediate visible bookmark state. The local list prevents duplicate entries, survives normal navigation and reload in the same browser, and does not sync to an account or another device. Clearing browser data removes it. If browser storage is unavailable, show that changes last for the current session only.
+Saved Places supports saving and unsaving from Explore place details. When signed in, membership persists to the user's account across reloads and new sessions. Guests keep a separate browser-local list; clearing browser data removes that guest list. If browser storage is unavailable, show that guest changes last for the current session only. Do not automatically import guest saves on sign in.
+
+Resolve saved state before enabling bookmarks or showing the empty state. Account changes show pending feedback and update bookmark/list state only when persistence confirms success. Failures must offer retry without claiming success or silently falling back to guest storage. Recheck account identity when returning to Saved/Explore or refocusing the window, hiding the previous account's list during resolution. The Saved page explains the active storage mode and offers guests a Sign in link while preserving their local Save interaction.
 
 The Saved page lists name, category, and area using existing mock data. It deliberately omits journey estimates because the list has no shared reference location. Selecting a saved place uses the existing specific-place Explore entry; it opens inspection without silently establishing a reference. Unsave removes the row, announces the change, and moves keyboard focus to the next available removal action or the empty-state heading. The empty state explains how to save and links back to Explore.
 

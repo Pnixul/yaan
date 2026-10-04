@@ -82,6 +82,32 @@ The core location exploration experience should not require authentication.
 
 Authentication exists to support persistent personal features rather than gate the product.
 
+### Implemented Auth Foundation
+
+`@supabase/supabase-js` and `@supabase/ssr` provide email/password Auth with Supabase-managed cookie sessions. `src/lib/supabase/server.ts` creates a request-scoped SSR client for Server Components, Server Actions, and Route Handlers. It uses `cookies().getAll/setAll`; tokens are not manually stored in localStorage. Auth runs on the server, so the browser receives forms and server-rendered identity rather than a global Auth provider or Supabase client bundle. Add a browser client only when a browser-side Supabase feature needs one.
+
+`src/proxy.ts` refreshes sessions with `getClaims()` and propagates refreshed cookies to both the request and response. Its matcher covers only Account and auth routes and never redirects guests. Account independently calls `getUser()` for current verified identity. Account is dynamically rendered, and Account/auth responses use private, no-store caching. Server Actions validate inputs, use Supabase's password APIs, and redirect only to `/account` after successful sign in, immediate-session registration, or sign out. Next.js supplies same-origin Server Action protections. Saved Places uses the same SSR client inside Server Actions, where cookie refresh writes are supported without expanding the proxy matcher or gating Explore.
+
+`/auth/confirm` supports both the default confirmation-email PKCE code (`exchangeCodeForSession`, using the signup verifier cookie) and custom signup token hashes (`verifyOtp`). Success requires a returned session. It redirects to a fixed relative Account destination and does not accept user-controlled return URLs. Confirmation responses are not cached and send a no-referrer policy. Registration uses the trusted `SITE_URL` origin, not a request Host header. The README documents both email templates and the default flow's same-browser requirement.
+
+Required configuration: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (an `sb_publishable_` key), and server-only `SITE_URL`. Production uses HTTPS. Safe empty placeholders are in `.env.example`; `.env.local` remains ignored. No service-role key is used. Missing project configuration renders an unavailable state; a missing/invalid site origin blocks registration with an error.
+
+Identity is stored only in Supabase-managed `auth.users`; the email-only Account needs no profile table or trigger. Do not duplicate Supabase's managed auth schema in application migrations or expose it through the Data API. The user-owned Saved table is defined below. Guest-to-account import or merging remains deferred.
+
+### Saved Places Persistence
+
+`public.saved_places` stores `user_id` (foreign key to `auth.users.id`, with delete cascade), `place_id` (the existing mock fixture ID), and `saved_at`. The composite primary key `(user_id, place_id)` deduplicates saves and indexes owner-filtered reads. There are no location snapshots, new place providers, or profile dependencies. Schema, explicit grants, and RLS are versioned in `supabase/migrations/20261004020906_create_saved_places.sql`.
+
+Only `authenticated` gets SELECT, INSERT, and DELETE grants, each with an ownership policy using `(select auth.uid()) = user_id`. There is no UPDATE grant or policy: saved membership cannot be reassigned. The application uses the existing publishable-key client and session; no service-role key or privileged database function is involved.
+
+`src/app/saved/actions.ts` verifies identity through `getUser()` on every read/write. Reads filter by owner and known fixture IDs, are bounded by fixture count, and return newest saves first. Mutations validate the place ID and accept an explicit save/unsave intent. Save uses insert-on-conflict-do-nothing, and unsave filters by owner and place, so retries are idempotent. An expected user ID from the current UI is compared with verified identity to reject stale account actions; it never supplies authorization.
+
+The existing client store resolves guest/account mode before exposing saved state. Authenticated lists are held only in memory and loaded from Supabase; confirmed writes update the shared bookmark/list state. Pending mutations disable additional changes, failures preserve confirmed state and offer retry, and a failed read is not rendered as an empty or guest list. Identity/data revalidate on remount and window focus. Generation checks discard stale asynchronous results across navigation/account changes; in-flight writes followed by a focus refresh trigger another read after completion.
+
+Guests retain the `yaan.saved-places` localStorage list, including validation, deduplication, storage events, and an in-memory fallback when storage is unavailable. Guest and account lists are separate: signing in never uploads local saves, and signing out never deletes either list. Changes from other account sessions become visible on reload, navigation, or window focus; realtime synchronization and guest import are deferred.
+
+`npm test` runs Auth callback and Saved server/store regressions. `supabase/tests/saved_places.sql` exercises real database ownership, grants, idempotency, and cascade behavior using temporary test users in a transaction that rolls back.
+
 ---
 
 ## Maps
@@ -164,15 +190,15 @@ Do not send an entire raw flood dataset to the browser when only a small geograp
 
 ## Application Architecture
 
-The App Router exposes Home at `/`, Explore at `/explore`, local Saved Places at `/saved`, and a minimal planned-feature placeholder at `/account`. A shared layout owns the responsive primary navigation. Home content stays server-rendered, with small client components for search and active navigation; MapLibre remains confined to Explore.
+The App Router exposes Home at `/`, Explore at `/explore`, Saved Places at `/saved`, and Supabase-backed Account at `/account`. A shared layout owns the responsive primary navigation. Home content stays server-rendered, with small client components for search and active navigation; MapLibre remains confined to Explore.
 
-The Saved Places prototype stores only known mock place IDs in localStorage under `yaan.saved-places`. Its isolated client store exposes saved IDs, readiness, storage availability, and toggle/remove operations to the UI. Validate and deduplicate stored values, ignore unknown IDs, use a stable empty snapshot during server rendering, and listen for storage changes from other tabs. Storage failures retain an in-memory list with a visible session-only notice. This is not authenticated or server persistence; future Supabase integration should replace this state boundary without changing the list or bookmark interaction model.
+Saved Places keeps its shared client-store boundary and existing list/bookmark interaction model. Persistence is account-owned Supabase storage for authenticated users and browser-local storage for guests, as defined above. Both modes resolve place details through the existing fixtures.
 
 Home links carry an `area` or `place` fixture ID in Explore's query parameters. Resolve those IDs against known mock data before initializing the existing exploration reducer, and ignore unknown values. A specific-place entry opens inspection without silently choosing a reference. Entry URLs preserve selection intent on reload; subsequent map state is not persisted or synchronized to the URL. No authentication, storage, or new provider is needed for this flow.
 
 The core location exploration prototype runs client-side with local typed fixtures. Keep areas and flood history, specific places and categories, mock route geometry, and interaction state separate from presentation components. The reference location is the origin for nearby distances and route previews.
 
-Use the existing MapLibre basemap and worker setup. No geocoding, POI, routing, database, or authentication integration is required for this prototype. Supabase and provider guidance elsewhere in this document describes future integration direction, not a requirement to install them now.
+Use the existing MapLibre basemap and worker setup. Geocoding, POI, routing, and flood-data providers remain deferred. Supabase supports Account and authenticated Saved membership; exploration and saved place details still use the established prototype fixtures.
 
 Prefer clear separation between:
 

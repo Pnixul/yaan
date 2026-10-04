@@ -14,7 +14,8 @@ import { MOCK_PLACES, categoryLabel } from "@/lib/mock-places";
 import { useSavedPlaces } from "@/lib/saved-places";
 
 export function SavedPlaces() {
-  const { ids, ready, persistent, remove } = useSavedPlaces();
+  const { ids, ready, persistent, mode, pending, error, remove, reload } =
+    useSavedPlaces();
   const [announcement, setAnnouncement] = useState("");
   const list = useRef<HTMLUListElement>(null);
   const emptyHeading = useRef<HTMLHeadingElement>(null);
@@ -25,17 +26,48 @@ export function SavedPlaces() {
   return (
     <main id="main-content" tabIndex={-1} className="saved-page">
       <header className="saved-heading">
-        <p className="eyebrow">Your places · Local prototype</p>
+        <p className="eyebrow">
+          Your places
+          {mode === "guest"
+            ? " · This browser"
+            : mode === "account"
+              ? " · Your account"
+              : ""}
+        </p>
         <h1>Saved places</h1>
         <p>A few places to come back to.</p>
       </header>
       <p className="saved-storage-note" role="status">
-        {!ready
-          ? "Loading saved places…"
-          : persistent
-            ? "Stored only in this browser. Clearing browser data removes them."
-            : "Browser storage is unavailable. Changes last for this session only."}
+        {error && !ready
+          ? "Saved places are unavailable."
+          : !ready
+            ? "Loading saved places…"
+            : mode === "account"
+              ? "Saved to your account. Available whenever you sign in."
+              : persistent
+                ? "Stored only in this browser. Clearing browser data removes them."
+                : "Browser storage is unavailable. Changes last for this session only."}
       </p>
+      {mode === "guest" && (
+        <p className="saved-storage-note">
+          <Link href="/account" className="underline">
+            Sign in
+          </Link>{" "}
+          to save places to your account. Browser saves stay separate.
+        </p>
+      )}
+      {error && (
+        <div className="saved-storage-note" role="alert">
+          <p>{error}</p>
+          <button
+            type="button"
+            className="text-button"
+            onClick={() => void reload()}
+          >
+            Try again
+          </button>
+        </div>
+      )}
       {ready &&
         (places.length ? (
           <>
@@ -71,9 +103,11 @@ export function SavedPlaces() {
                     <button
                       type="button"
                       className="saved-remove"
+                      disabled={pending}
                       aria-label={`Unsave ${place.name}`}
-                      onClick={() => {
-                        remove(place.id);
+                      onClick={async () => {
+                        setAnnouncement("");
+                        if (!(await remove(place.id))) return;
                         setAnnouncement(
                           `${place.name} removed from Saved Places.`,
                         );
@@ -117,7 +151,7 @@ export function SavedPlaces() {
           </section>
         ))}
       <span className="sr-only" role="status">
-        {announcement}
+        {pending ? "Updating saved places…" : announcement}
       </span>
     </main>
   );

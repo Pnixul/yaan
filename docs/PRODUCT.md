@@ -42,9 +42,9 @@ Home introduces YAAN as a location-first product and offers search immediately. 
 
 The implemented entry points are Home (`/`) and the established Explore workspace (`/explore`). Home provides search, example areas, and a brief explanation of nearby essentials, journey context, and area history. Explore remains the place for investigation; Home does not duplicate its map interactions.
 
-Primary navigation contains Home, Explore, Saved, and Account. Saved supports a local prototype list in this browser; Account remains a clearly labelled placeholder. The broader planned information architecture also includes Sign in / Sign up, About YAAN, Data & Sources, and supporting Privacy / Feedback content. Those experiences are not implemented.
+Primary navigation contains Home, Explore, Saved, and Account. Saved persists to the authenticated user's account, with a separate browser-local list for guests. Account supports email/password sign up, sign in, authenticated email identity, and sign out. About YAAN, Data & Sources, and supporting Privacy / Feedback content remain planned.
 
-Guest exploration is a product principle: Home, search, reference selection, nearby places, routes, and area context remain accessible without authentication. Future authentication should appear only for account-dependent actions, such as saving a place.
+Guest exploration is a product principle: Home, search, reference selection, nearby places, routes, and area context remain accessible without authentication. Authentication applies only to account-dependent functionality. The local Save experience also remains available to guests. Guest saves are not automatically imported or merged into an account.
 
 ### Location First
 
@@ -154,7 +154,7 @@ Detailed data sources, methodology, limitations, analysis rules, and risk calcul
 
 YAAN is not intended to become a general-purpose replacement for map or navigation products.
 
-YAAN is not a booking platform or property marketplace. The core exploration prototype includes local Saved Places, without authentication or account synchronization. It does not include reviews, posting, comparisons, recommendations, or personalization. Route previews provide location context rather than turn-by-turn navigation.
+YAAN is not a booking platform or property marketplace. The core exploration prototype includes account-owned Saved Places and a separate local guest list. It does not include reviews, posting, comparisons, recommendations, or personalization. Route previews provide location context rather than turn-by-turn navigation.
 
 Features should support the goal of understanding a location rather than reproducing unrelated map functionality.
 
