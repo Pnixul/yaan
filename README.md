@@ -111,7 +111,19 @@ To verify database isolation, run the complete [Saved Places SQL test](supabase/
 4. Sign in as account B. A's list must not appear; B can save the same place independently. Switch back to A and verify each account retained its own list. Signing out should restore the guest list without deleting account saves.
 5. Check narrow/mobile and desktop layouts, bookmark pending states, keyboard focus after removal, loading, and the empty state. Disable the network during loading or saving: the UI must show an error/retry state without claiming persistence or switching account saves to local storage. Restore connectivity and retry. Reload if a response was lost to reconcile the final database state.
 
-Real Routing, realtime list subscriptions, and guest-to-account import/merging remain deferred. Place details and journeys still use the current mock fixtures.
+Explore application navigation is URL-backed; geographic routing, realtime list subscriptions, and guest-to-account import/merging remain deferred. Place details and journeys still use the current mock fixtures.
+
+### Explore routing verification
+
+Explore supports `area`, `reference`, `place`, `category`, and `view=conditions|route` query parameters. For example, `/explore?area=ari&reference=ari-bts&category=food` restores nearby food around Ari BTS. Existing `/explore?place=…` Saved links open place details without establishing a reference. See `docs/UX.md` and `docs/TECH_STACK.md` for navigation and validation rules. `npm test` includes URL parsing, restoration, and navigation-hook regressions.
+
+Before Deploy, check on mobile and desktop:
+
+1. Open an area from Home, inspect a place, choose “Explore around this place,” select a category, and open another place. Refresh and open a copied URL in a new tab; area, reference, category, and details should match.
+2. Use browser Back/Forward across list, detail, “Back to nearby,” and reference changes. Confirm the visible panel matches the URL and repeated selection does not add duplicate steps.
+3. Open a place from Saved and refresh. It should have no implicit reference; “Back to area” should work even in a new tab. Confirm saving/unsaving still works for the active guest/account list.
+4. Open Directions, refresh, then Clear route and use Back/Forward. The existing mock route and its endpoints should restore; no real navigation claim is introduced. Check Area context restoration as well.
+5. Try unknown/repeated IDs and mismatched area/reference/place parameters. The page should resolve safely without crashing or displaying a route between different areas. Check keyboard operation and the mobile detail sheet.
 
 ### Auth acceptance checks after configuration
 

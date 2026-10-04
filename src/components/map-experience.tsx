@@ -1,6 +1,6 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useReducer, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { ArrowUpRight, MapPin, X } from "lucide-react";
 import { LocationSearch } from "@/components/location-search";
 import { LocationResult } from "@/components/location-result";
@@ -15,11 +15,7 @@ import {
   type SearchResult,
 } from "@/lib/mock-places";
 import { buildMockRoute } from "@/lib/mock-routes";
-import {
-  explorationReducer,
-  initialExploration,
-  type ExplorationState,
-} from "@/lib/exploration-state";
+import { useExploreNavigation } from "@/lib/use-explore-navigation";
 const NeighborhoodMap = dynamic(() => import("@/components/neighborhood-map"), {
   ssr: false,
   loading: () => (
@@ -29,13 +25,18 @@ const NeighborhoodMap = dynamic(() => import("@/components/neighborhood-map"), {
     </div>
   ),
 });
-export function MapExperience({
-  initialState = initialExploration,
-}: {
-  initialState?: ExplorationState;
-}) {
-  const [state, dispatch] = useReducer(explorationReducer, initialState);
-  const [expanded, setExpanded] = useState(Boolean(initialState.placeId));
+export function MapExperience() {
+  const { state, dispatch, href } = useExploreNavigation();
+  const [previousHref, setPreviousHref] = useState(href);
+  const [expanded, setExpanded] = useState(
+    (Boolean(state.placeId) && !state.routing) || state.view === "conditions",
+  );
+  if (previousHref !== href) {
+    setPreviousHref(href);
+    setExpanded(
+      (Boolean(state.placeId) && !state.routing) || state.view === "conditions",
+    );
+  }
   const [showReports, setShowReports] = useState(true);
   const area = MOCK_AREAS.find((item) => item.id === state.areaId)!;
   const reference =
@@ -71,11 +72,11 @@ export function MapExperience({
   const inspect = useCallback((place: MockPlace) => {
     dispatch({ type: "inspect", place });
     setExpanded(true);
-  }, []);
+  }, [dispatch]);
   const openReport = useCallback((report: MockReport) => {
     dispatch({ type: "report", report });
     setExpanded(true);
-  }, []);
+  }, [dispatch]);
   function search(result: SearchResult) {
     if (result.kind === "area") {
       dispatch({ type: "area", id: result.id });
