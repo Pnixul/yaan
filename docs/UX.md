@@ -36,7 +36,7 @@ Home, Explore, Saved, and Account are directly accessible in a labelled bottom n
 
 Reserve space for the mobile navigation and safe-area inset: it must not cover document content, map attribution, or the location sheet. Keep the existing map and sheet interaction model, with adjustments for short screens. Search suggestions must remain reachable above navigation.
 
-Saved offers account-owned or browser-local guest lists with links back to Explore. Account offers sign in and sign up without introducing an authentication gate elsewhere.
+Saved offers account-owned lists with links back to Explore, or a sign-in state for signed-out visitors. Account offers sign in and sign up without introducing an authentication gate elsewhere.
 
 ---
 
@@ -150,23 +150,23 @@ Authentication should not block the core exploration experience.
 
 Users should be able to search locations and understand basic area information without signing in.
 
-Account Saved Places requires authentication; the guest Save experience remains available using browser-local storage. Guest and account lists are kept separate, without automatic import.
+Saving requires authentication. A signed-out Save action opens Account with the selected place named and explains that signing in or creating an account will save it and return to the exact Explore URL. A pending save lasts up to 24 hours in this browser; starting another Save replaces it. Normal Account visits do not resume unrelated pending requests. A secondary “Return without saving” action cancels the request and restores Explore.
 
 Account uses labelled email/password controls with sign-in and sign-up choices, pending feedback, native validation, and understandable server errors. While identity is resolving, show a checking state rather than a signed-out form. If account services cannot be reached, show a retry state rather than claiming the user has signed out.
 
-When Supabase requires email confirmation, explain that the user is not signed in yet and should check their inbox. Do not claim that a new account was created or an email delivered when Supabase deliberately obscures an existing account. A valid confirmation link establishes the session and returns to Account; an invalid or expired link provides recovery guidance. If confirmation is disabled in the project, a successful registration with a session goes directly to signed-in Account.
+When Supabase requires email confirmation, explain that the user is not signed in yet and should check their inbox. Do not claim that a new account was created or an email delivered when Supabase deliberately obscures an existing account. A valid confirmation link establishes the session. For a pending Save in the same browser, save the place and return to the original Explore context; otherwise return to Account (or Saved when authentication started there). Invalid or expired links preserve a valid pending request and offer sign-in recovery. Ask the user to open confirmation in the same browser; if they confirm elsewhere, they can return to the original Account page and sign in to finish saving. Registration with an immediate session follows the same return rules.
 
-Signed-in Account shows the verified email and Sign out. Sign out applies to this browser session. Account explains that signed-in saves are account-owned and guest saves remain separate in this browser. Missing deployment configuration leaves exploration and local Saved available with a concise account-unavailable state.
+Signed-in Account shows the verified email, a primary Continue exploring action, secondary access to Saved Places, and a utility Sign out control. Sign out applies to this browser session and clears pending auth intent. Signed-out Account prioritizes the active credential submission, with sign-in/create-account mode choices disabled during submission. Missing deployment configuration leaves exploration available and explains that saving is unavailable.
 
-Authentication should feel like an extension of the experience, not an entry barrier. Profile editing, password reset, OAuth, account deletion, and guest-to-account import remain deferred.
+Authentication should feel like an extension of the experience, not an entry barrier. Profile editing, password reset, OAuth, and account deletion remain deferred. Legacy guest saves are not retained or imported.
 
 ---
 
 ## Saved Places
 
-Saved Places supports saving and unsaving from Explore place details. When signed in, membership persists to the user's account across reloads and new sessions. Guests keep a separate browser-local list; clearing browser data removes that guest list. If browser storage is unavailable, show that guest changes last for the current session only. Do not automatically import guest saves on sign in.
+Saved Places supports saving and unsaving from Explore place details. When signed in, membership persists to the user's account across reloads and new sessions. There is no guest or session-only saving. Remove the legacy browser list on the next Saved/bookmark mount without reading or importing it.
 
-Resolve saved state before enabling bookmarks or showing the empty state. Account changes show pending feedback and update bookmark/list state only when persistence confirms success. Failures must offer retry without claiming success or silently falling back to guest storage. Recheck account identity when returning to Saved/Explore or refocusing the window, hiding the previous account's list during resolution. The Saved page explains the active storage mode and offers guests a Sign in link while preserving their local Save interaction.
+Resolve saved state before enabling bookmarks or showing the empty state. Account changes show pending feedback and update bookmark/list state only when persistence confirms success. Failures must offer retry without claiming success. A failed pending save leaves the user signed in on Account with “Retry save and return”; keep the intent until the save is confirmed or cancelled. Idempotent saves make retry safe. Recheck account identity when returning to Saved/Explore or refocusing the window, hiding the previous account's list during resolution. The Saved page remains directly accessible when signed out. Show an authentication state explaining cross-device access, a primary Sign in or create account action that returns to Saved, and a secondary Continue exploring link. Do not show the account empty state until authenticated loading succeeds.
 
 The Saved page lists name, category, and area using existing mock data. It deliberately omits journey estimates because the list has no shared reference location. Selecting a saved place uses the existing specific-place Explore entry; it opens inspection without silently establishing a reference. Unsave removes the row, announces the change, and moves keyboard focus to the next available removal action or the empty-state heading. The empty state explains how to save and links back to Explore.
 

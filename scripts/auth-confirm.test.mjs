@@ -24,6 +24,10 @@ function loadHandler(client) {
       if (name === "@/lib/supabase/server") {
         return { createClient: async () => client };
       }
+      if (name === "@/lib/auth-intent")
+        return { accountIntentHref: (id) => `/account?intent=${id}` };
+      if (name === "@/lib/auth-intent-server")
+        return { readConfirmationReturn: async () => null };
       throw new Error(`Unexpected route dependency: ${name}`);
     },
   });

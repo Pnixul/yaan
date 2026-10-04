@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
 import "./account.css";
 
 export default function AccountLayout({ children }: { children: ReactNode }) {
@@ -8,16 +7,13 @@ export default function AccountLayout({ children }: { children: ReactNode }) {
       <header className="account-heading">
         <p className="eyebrow">Your YAAN</p>
         <h1>Account</h1>
-        <p>Explore freely. Sign in when you need your account.</p>
+        <p>Keep useful places together, ready for another look.</p>
       </header>
       <div className="account-content">{children}</div>
       <p className="account-note">
-        When signed in, Saved Places are stored in your account. Guest saves
-        stay in this browser and aren’t imported into your account.
+        Saved Places belongs to your account. You can explore without signing
+        in.
       </p>
-      <Link className="home-explore-link" href="/explore">
-        Keep exploring <span aria-hidden="true">→</span>
-      </Link>
     </main>
   );
 }

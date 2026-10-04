@@ -7,7 +7,7 @@ import { MOCK_PLACES } from "@/lib/mock-places";
 const knownIds = new Set(MOCK_PLACES.map((place) => place.id));
 
 export type SavedPlacesResult =
-  | { mode: "guest" }
+  | { mode: "signed-out" }
   | { mode: "account"; userId: string; ids: string[] }
   | { mode: "error"; error: string };
 
@@ -17,10 +17,15 @@ export type SaveResult =
 export async function loadSavedPlaces(): Promise<SavedPlacesResult> {
   try {
     const supabase = await createClient();
-    if (!supabase) return { mode: "guest" };
+    if (!supabase)
+      return {
+        mode: "error",
+        error:
+          "Account services are unavailable. You can still explore; please try saving later.",
+      };
     const { data: auth, error: authError } = await supabase.auth.getUser();
     if (authError && !isAuthSessionMissingError(authError)) throw authError;
-    if (!auth.user) return { mode: "guest" };
+    if (!auth.user) return { mode: "signed-out" };
 
     const { data, error } = await supabase
       .from("saved_places")

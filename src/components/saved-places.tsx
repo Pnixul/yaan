@@ -14,8 +14,7 @@ import { MOCK_PLACES, categoryLabel } from "@/lib/mock-places";
 import { useSavedPlaces } from "@/lib/saved-places";
 
 export function SavedPlaces() {
-  const { ids, ready, persistent, mode, pending, error, remove, reload } =
-    useSavedPlaces();
+  const { ids, ready, mode, pending, error, remove, reload } = useSavedPlaces();
   const [announcement, setAnnouncement] = useState("");
   const list = useRef<HTMLUListElement>(null);
   const emptyHeading = useRef<HTMLHeadingElement>(null);
@@ -28,11 +27,7 @@ export function SavedPlaces() {
       <header className="saved-heading">
         <p className="eyebrow">
           Your places
-          {mode === "guest"
-            ? " · This browser"
-            : mode === "account"
-              ? " · Your account"
-              : ""}
+          {mode === "account" ? " · Your account" : ""}
         </p>
         <h1>Saved places</h1>
         <p>A few places to come back to.</p>
@@ -44,17 +39,23 @@ export function SavedPlaces() {
             ? "Loading saved places…"
             : mode === "account"
               ? "Saved to your account. Available whenever you sign in."
-              : persistent
-                ? "Stored only in this browser. Clearing browser data removes them."
-                : "Browser storage is unavailable. Changes last for this session only."}
+              : "Sign in to access your saved places."}
       </p>
-      {mode === "guest" && (
-        <p className="saved-storage-note">
-          <Link href="/account" className="underline">
-            Sign in
-          </Link>{" "}
-          to save places to your account. Browser saves stay separate.
-        </p>
+      {mode === "signed-out" && (
+        <section className="saved-empty" aria-labelledby="saved-signin-title">
+          <Bookmark size={28} strokeWidth={1.5} aria-hidden="true" />
+          <h2 id="saved-signin-title">Keep your places together.</h2>
+          <p>
+            Sign in or create an account to save places and find them again on
+            any device.
+          </p>
+          <Link className="primary-button" href="/account?next=/saved">
+            Sign in or create account <ArrowRight size={18} />
+          </Link>
+          <Link className="home-explore-link" href="/explore">
+            Continue exploring <ArrowRight size={18} />
+          </Link>
+        </section>
       )}
       {error && (
         <div className="saved-storage-note" role="alert">
@@ -69,6 +70,7 @@ export function SavedPlaces() {
         </div>
       )}
       {ready &&
+        mode === "account" &&
         (places.length ? (
           <>
             <div className="saved-list-heading">

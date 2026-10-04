@@ -1,5 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { accountIntentHref } from "@/lib/auth-intent";
+import {
+  clearAuthIntent,
+  completeSaveIntent,
+  readConfirmationReturn,
+} from "@/lib/auth-intent-server";
 
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
@@ -7,6 +13,9 @@ export async function GET(request: NextRequest) {
   const tokenHash = params.get("token_hash");
   const type = params.get("type");
   let confirmed = false;
+  let userId: string | undefined;
+  let email: string | undefined;
+  const returnContext = await readConfirmationReturn();
 
   if (!params.has("error") && !params.has("error_code")) {
     try {
@@ -17,6 +26,8 @@ export async function GET(request: NextRequest) {
         const { data, error } =
           await supabase.auth.exchangeCodeForSession(code);
         confirmed = !error && Boolean(data.session);
+        userId = data.session?.user.id;
+        email = data.session?.user.email;
       } else if (
         supabase &&
         !code &&
@@ -30,18 +41,39 @@ export async function GET(request: NextRequest) {
           type: "signup",
         });
         confirmed = !error && Boolean(data.session);
+        userId = data.session?.user.id;
+        email = data.session?.user.email;
       }
     } catch {
       // Never reflect provider errors, tokens, or user-supplied redirect targets.
     }
   }
 
-  // A relative, fixed destination cannot be turned into an open redirect by a
-  // next/redirect query parameter or a forwarded Host header.
+  let destination = confirmed ? "/account" : "/account?confirmation=error";
+  if (!confirmed && returnContext?.intentId) {
+    destination = `${accountIntentHref(returnContext.intentId)}&confirmation=error`;
+  } else if (
+    confirmed &&
+    returnContext &&
+    email &&
+    email.toLowerCase() === returnContext.email
+  ) {
+    if (returnContext?.intentId) {
+      const result = await completeSaveIntent(returnContext.intentId, userId);
+      destination = result.ok
+        ? result.returnTo
+        : `${accountIntentHref(returnContext.intentId)}&save=error`;
+    } else {
+      destination = returnContext?.next ?? "/account";
+      await clearAuthIntent();
+    }
+  }
+  // All return context comes from validated first-party cookies. Query-string
+  // next/redirect values and the request Host cannot supply a destination.
   return new NextResponse(null, {
     status: 303,
     headers: {
-      Location: confirmed ? "/account" : "/account?confirmation=error",
+      Location: destination,
       "Cache-Control": "private, no-store",
       "Referrer-Policy": "no-referrer",
     },

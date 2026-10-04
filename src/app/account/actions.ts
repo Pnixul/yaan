@@ -4,6 +4,13 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getConfirmationUrl } from "@/lib/supabase/config";
 import { authErrorMessage } from "@/lib/supabase/auth-errors";
+import { accountIntentHref, savedReturn } from "@/lib/auth-intent";
+import {
+  clearAuthIntent,
+  completeSaveIntent,
+  readSaveIntent,
+  rememberConfirmation,
+} from "@/lib/auth-intent-server";
 
 export type AuthFormState = {
   error?: string;
@@ -19,6 +26,9 @@ export async function authenticate(
   const emailValue = form.get("email");
   const password = form.get("password");
   const email = typeof emailValue === "string" ? emailValue.trim() : "";
+  const intent = await readSaveIntent(form.get("intent"));
+  const next = savedReturn(form.get("next"));
+  let userId: string | undefined;
 
   if (mode !== "signin" && mode !== "signup")
     return { error: "Choose sign in or sign up." };
@@ -52,6 +62,8 @@ export async function authenticate(
             "Registration is temporarily unavailable. Please try again later.",
           email,
         };
+      // The fixed callback uses a browser-bound return record, not an arbitrary redirect URL.
+      await rememberConfirmation(intent?.id ?? null, next, email);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -61,12 +73,20 @@ export async function authenticate(
       // Supabase can return an obfuscated existing user. Do not claim a new
       // account or a delivered email, and never treat a null session as signed in.
       if (!data.session) return { confirmation: true, email };
+      userId = data.session.user.id;
     } else {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (error) return { error: authErrorMessage(error), email };
+      if (!data.session)
+        return {
+          error:
+            "We couldn’t establish your session. Please try signing in again.",
+          email,
+        };
+      userId = data.session.user.id;
     }
   } catch {
     return {
@@ -74,7 +94,15 @@ export async function authenticate(
       email,
     };
   }
-  redirect("/account");
+  if (intent) {
+    const result = await completeSaveIntent(intent.id, userId);
+    redirect(
+      result.ok
+        ? result.returnTo
+        : `${accountIntentHref(intent.id)}&save=error`,
+    );
+  }
+  redirect(form.get("intent") ? "/account?save=expired" : next);
 }
 
 export async function signOut(): Promise<AuthFormState> {
@@ -83,6 +111,7 @@ export async function signOut(): Promise<AuthFormState> {
     if (!supabase) return { error: "Account access is not available yet." };
     const { error } = await supabase.auth.signOut({ scope: "local" });
     if (error) return { error: "We couldn’t sign you out. Please try again." };
+    await clearAuthIntent();
   } catch {
     return { error: "We couldn’t reach account services. Please try again." };
   }

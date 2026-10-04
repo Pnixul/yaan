@@ -76,6 +76,9 @@
   color: #5e7066;
 }
 .account-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: 48px;
   border-radius: 8px;
   padding: 12px 18px;
@@ -83,6 +86,20 @@
   color: #fff;
   font-size: 14px;
   font-weight: 600;
+}
+.account-onward {
+  display: grid;
+  gap: 12px;
+}
+.account-signout {
+  justify-self: start;
+  min-height: 44px;
+  margin-top: 20px;
+  text-decoration: underline;
+}
+.account-modes button:disabled {
+  cursor: wait;
+  opacity: 0.6;
 }
 .account-button:hover:not(:disabled) {
   background: #1c464a;

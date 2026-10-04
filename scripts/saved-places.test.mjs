@@ -114,17 +114,17 @@ test("load uses verified owner, bounded known-place filtering, and ignores unkno
   );
 });
 
-test("only a missing session or configuration resolves to guest; outages remain errors", async () => {
+test("only a missing session resolves to signed-out; configuration and service failures remain errors", async () => {
   for (const options of [
     { userId: null },
-    { configured: false },
     { userId: null, authError: { code: "missing_session" } },
   ]) {
     const api = server(options);
-    assert.equal((await api.loadSavedPlaces()).mode, "guest");
+    assert.equal((await api.loadSavedPlaces()).mode, "signed-out");
     assert.ok(!api.calls.some((call) => call[0] === "from"));
   }
   for (const options of [
+    { configured: false },
     { authError: { code: "network_error" } },
     { databaseError: { message: "missing table" } },
   ]) {
@@ -179,7 +179,7 @@ test("saving is idempotent and unsaving explicitly filters the verified owner an
 });
 
 function store({
-  read = async () => ({ mode: "guest" }),
+  read = async () => ({ mode: "signed-out" }),
   write = async () => ({ ok: true }),
   stored = "[]",
   blocked = false,
@@ -210,6 +210,10 @@ function store({
         removeEventListener: (name) => events.delete(name),
       },
       localStorage: {
+        removeItem: () => {
+          if (blocked) throw new Error("blocked");
+          raw = null;
+        },
         getItem: () => {
           if (blocked) throw new Error("blocked");
           return raw;
@@ -232,25 +236,30 @@ function store({
   };
 }
 
-test("guests keep validated browser saves and session-only fallback", async () => {
-  const local = store({ stored: '["place-a","place-a","unknown"]' });
+test("signed-out users cannot save and legacy guest data is discarded, never imported", async () => {
+  let writes = 0;
+  const local = store({
+    stored: '["place-a"]',
+    write: async () => {
+      writes++;
+      return { ok: true };
+    },
+  });
   local.attach();
   await tick();
-  assert.deepEqual(local.state().ids, ["place-a"]);
-  assert.equal(await local.toggle("place-b"), true);
-  assert.deepEqual(JSON.parse(local.raw()), ["place-b", "place-a"]);
-  const fallback = store({ blocked: true });
-  const detach = fallback.attach();
+  assert.equal(local.state().mode, "signed-out");
+  assert.deepEqual(local.state().ids, []);
+  assert.equal(local.raw(), null);
+  assert.equal(await local.toggle("place-b"), false);
+  assert.equal(writes, 0);
+  const blocked = store({ blocked: true, stored: '["place-a"]' });
+  blocked.attach();
   await tick();
-  await fallback.toggle("place-a");
-  detach();
-  fallback.attach();
-  await tick();
-  assert.equal(fallback.state().persistent, false);
-  assert.deepEqual(fallback.state().ids, ["place-a"]);
+  assert.deepEqual(blocked.state().ids, []);
+  assert.equal(await blocked.toggle("place-b"), false);
 });
 
-test("account writes await confirmation, suppress double clicks, and never alter guest storage", async () => {
+test("account writes await confirmation, suppress double clicks, and never import guest storage", async () => {
   const request = deferred();
   const writes = [];
   const account = store({
@@ -272,7 +281,7 @@ test("account writes await confirmation, suppress double clicks, and never alter
   request.resolve({ ok: true });
   assert.equal(await saving, true);
   assert.deepEqual(account.state().ids, ["place-a"]);
-  assert.equal(account.raw(), '["place-b"]');
+  assert.equal(account.raw(), null);
   assert.deepEqual(writes, [["place-a", true, "user-a"]]);
 });
 
@@ -318,7 +327,7 @@ test("late loads cannot restore the previous account after navigation", async ()
   assert.deepEqual(account.state().ids, ["place-b"]);
 });
 
-test("signout during a pending write discards stale account state and restores separate guest data", async () => {
+test("signout during a pending write discards stale account state and shows no saved list", async () => {
   const pending = deferred();
   let signedIn = true;
   const account = store({
@@ -326,7 +335,7 @@ test("signout during a pending write discards stale account state and restores s
     read: async () =>
       signedIn
         ? { mode: "account", userId: "user-a", ids: [] }
-        : { mode: "guest" },
+        : { mode: "signed-out" },
     write: () => pending.promise,
   });
   account.attach();
@@ -338,9 +347,9 @@ test("signout during a pending write discards stale account state and restores s
   await tick();
   pending.resolve({ ok: true });
   assert.equal(await saving, false);
-  assert.equal(account.state().mode, "guest");
-  assert.deepEqual(account.state().ids, ["place-b"]);
-  assert.equal(account.raw(), '["place-b"]');
+  assert.equal(account.state().mode, "signed-out");
+  assert.deepEqual(account.state().ids, []);
+  assert.equal(account.raw(), null);
 });
 
 test("expired or changed account during mutation reloads identity without claiming success", async () => {
@@ -349,7 +358,7 @@ test("expired or changed account during mutation reloads identity without claimi
     read: async () =>
       signedIn
         ? { mode: "account", userId: "user-a", ids: ["place-a"] }
-        : { mode: "guest" },
+        : { mode: "signed-out" },
     write: async () => {
       signedIn = false;
       return { ok: false, sessionChanged: true, error: "Account changed" };
@@ -358,7 +367,7 @@ test("expired or changed account during mutation reloads identity without claimi
   account.attach();
   await tick();
   assert.equal(await account.remove("place-a"), false);
-  assert.equal(account.state().mode, "guest");
+  assert.equal(account.state().mode, "signed-out");
   assert.deepEqual(account.state().ids, []);
   assert.equal(account.state().error, "Account changed");
 });

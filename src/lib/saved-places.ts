@@ -4,21 +4,18 @@ import { useSyncExternalStore } from "react";
 import { MOCK_PLACES } from "./mock-places";
 import { loadSavedPlaces, setSavedPlace } from "@/app/saved/actions";
 
-const STORAGE_KEY = "yaan.saved-places";
 const knownIds = new Set(MOCK_PLACES.map((place) => place.id));
 type SavedState = {
   ids: string[];
   ready: boolean;
-  persistent: boolean;
   userId: string | null;
-  mode: "guest" | "account" | null;
+  mode: "signed-out" | "account" | null;
   pending: boolean;
   error: string | null;
 };
 const serverState: SavedState = {
   ids: [],
   ready: false,
-  persistent: true,
   userId: null,
   mode: null,
   pending: false,
@@ -26,47 +23,11 @@ const serverState: SavedState = {
 };
 let state = serverState;
 let generation = 0;
-let guestIds: string[] = [];
-let guestPersistent = true;
 const listeners = new Set<() => void>();
-
-// Persist IDs only, and treat browser storage as untrusted input.
-function decode(raw: string | null): string[] {
-  try {
-    const value: unknown = JSON.parse(raw ?? "[]");
-    return Array.isArray(value)
-      ? [
-          ...new Set(
-            value.filter(
-              (id): id is string => typeof id === "string" && knownIds.has(id),
-            ),
-          ),
-        ]
-      : [];
-  } catch {
-    return [];
-  }
-}
 
 function publish(next: SavedState) {
   state = next;
   listeners.forEach((listener) => listener());
-}
-
-function readStorage() {
-  try {
-    guestIds = decode(localStorage.getItem(STORAGE_KEY));
-    guestPersistent = true;
-  } catch {
-    guestPersistent = false;
-  }
-  publish({
-    ...serverState,
-    ids: guestIds,
-    ready: true,
-    persistent: guestPersistent,
-    mode: "guest",
-  });
 }
 
 async function reload() {
@@ -76,7 +37,8 @@ async function reload() {
   try {
     const result = await loadSavedPlaces();
     if (current !== generation || !listeners.size) return;
-    if (result.mode === "guest") readStorage();
+    if (result.mode === "signed-out")
+      publish({ ...serverState, ready: true, mode: "signed-out" });
     else if (result.mode === "account") {
       publish({
         ...serverState,
@@ -96,14 +58,6 @@ async function reload() {
   }
 }
 
-function onStorage(event: StorageEvent) {
-  if (
-    state.mode === "guest" &&
-    (event.key === STORAGE_KEY || event.key === null)
-  )
-    readStorage();
-}
-
 function onFocus() {
   void reload();
 }
@@ -111,14 +65,18 @@ function onFocus() {
 function subscribe(listener: () => void) {
   listeners.add(listener);
   if (listeners.size === 1) {
-    window.addEventListener("storage", onStorage);
+    // Discard the retired guest list without reading or importing it.
+    try {
+      localStorage.removeItem("yaan.saved-places");
+    } catch {
+      /* Storage may be blocked. */
+    }
     window.addEventListener("focus", onFocus);
     void reload();
   }
   return () => {
     listeners.delete(listener);
     if (!listeners.size) {
-      window.removeEventListener("storage", onStorage);
       window.removeEventListener("focus", onFocus);
       generation++;
       state = serverState;
@@ -126,27 +84,11 @@ function subscribe(listener: () => void) {
   };
 }
 
-function write(ids: string[]) {
-  let persistent = true;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-  } catch {
-    persistent = false;
-  }
-  guestIds = ids;
-  guestPersistent = persistent;
-  publish({ ...state, ids, persistent, error: null });
-}
-
 async function setSaved(id: string, saved: boolean): Promise<boolean> {
   if (!knownIds.has(id) || !state.ready || state.pending) return false;
   const ids = saved
     ? [id, ...state.ids.filter((item) => item !== id)]
     : state.ids.filter((item) => item !== id);
-  if (state.mode === "guest") {
-    write(ids);
-    return true;
-  }
   if (!state.userId) return false;
 
   const current = ++generation;
