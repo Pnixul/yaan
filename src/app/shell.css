@@ -22,11 +22,59 @@ body {
 .site-prototype {
   margin-left: auto;
   font-size: 11px;
-  color: #5e7066;
+  color: var(--muted-foreground);
   white-space: nowrap;
 }
 .site-prototype > span {
   display: none;
+}
+.theme-control {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 7px;
+  color: var(--muted-foreground);
+  font-size: 12px;
+}
+.theme-control select {
+  min-height: 44px;
+  max-width: 94px;
+  padding: 0 6px;
+  border: 1px solid var(--input);
+  border-radius: 8px;
+  color: var(--secondary-foreground);
+  background: var(--surface);
+  cursor: pointer;
+}
+.theme-control select:hover {
+  background: var(--secondary);
+}
+@media (max-width: 400px) {
+  .site-header {
+    padding-inline: 12px;
+    gap: 8px;
+  }
+  .theme-control {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    font-size: 10px;
+  }
+  .theme-control select {
+    min-height: 44px;
+    font-size: 12px;
+  }
+}
+/* Override component hover states for unavailable actions without fading text. */
+:root body button:disabled {
+  color: var(--disabled-foreground);
+  background: var(--disabled);
+  border-color: var(--border);
+  box-shadow: none;
+  opacity: 1;
+}
+:where(.secondary-button, .save-place-button, .text-button, .account-retry):active:not(:disabled) {
+  background: var(--secondary-hover);
 }
 .primary-nav {
   position: fixed;
@@ -36,8 +84,8 @@ body {
   padding: 4px 8px calc(4px + env(safe-area-inset-bottom));
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid #dce3d7;
-  background: #fafaf5;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
 }
 .primary-nav a {
   display: flex;
@@ -47,19 +95,19 @@ body {
   gap: 3px;
   min-width: 0;
   border-radius: 8px;
-  color: #5e7066;
+  color: var(--muted-foreground);
   font-size: 11px;
   text-decoration: none;
   min-height: 44px;
 }
 .primary-nav a[aria-current="page"] {
-  color: #24585d;
-  background: #e7eee6;
+  color: var(--primary);
+  background: var(--primary-soft);
   font-weight: 650;
 }
 .primary-nav a:hover {
-  color: #24585d;
-  background: #edf1e9;
+  color: var(--primary);
+  background: var(--secondary);
 }
 .primary-nav a:focus-visible {
   outline-offset: -3px;
@@ -90,7 +138,7 @@ body {
   }
   .zoom-controls button:first-child {
     border-bottom: 0;
-    border-right: 1px solid #e4e9e0;
+    border-right: 1px solid var(--border);
     border-radius: 9px 0 0 9px;
   }
   .zoom-controls button:last-child {
@@ -121,7 +169,7 @@ body {
   margin: 0 auto;
 }
 .planned-page > svg {
-  color: #24585d;
+  color: var(--primary);
   margin-bottom: 28px;
 }
 .planned-page .eyebrow {
@@ -136,7 +184,7 @@ body {
   margin: 16px 0;
 }
 .planned-page > p:not(.eyebrow) {
-  color: #5e7066;
+  color: var(--muted-foreground);
   line-height: 1.8;
   font-size: 15px;
 }
@@ -146,8 +194,8 @@ body {
   gap: 18px;
   margin-top: 30px;
   min-height: 46px;
-  color: #24585d;
-  border-bottom: 1px solid #71928a;
+  color: var(--primary);
+  border-bottom: 1px solid var(--primary);
   font-size: 14px;
   font-weight: 600;
 }
@@ -186,7 +234,7 @@ body {
     padding-top: 110px;
   }
 }
-@media (min-width: 1100px) {
+@media (min-width: 1280px) {
   .site-header {
     padding: 0 32px;
   }

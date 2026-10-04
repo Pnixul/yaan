@@ -19,6 +19,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { DEMO_MAP_STYLE } from "@/lib/map-config";
+import { applyMapTheme, mapColor } from "@/lib/map-theme";
 import {
   MOCK_AREAS,
   formatReportDate,
@@ -66,8 +67,12 @@ export default function NeighborhoodMap({
 
   useEffect(() => {
     if (!container.current) return;
+    const mapContainer = container.current;
+    mapContainer.dataset.themed = "false";
+    let styleReady = false;
     let map: Map | undefined;
     let observer: ResizeObserver | undefined;
+    let themeObserver: MutationObserver | undefined;
     const timeout = window.setTimeout(() => setStatus("error"), 20000);
     try {
       setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
@@ -84,6 +89,22 @@ export default function NeighborhoodMap({
         touchPitch: false,
       });
       mapRef.current = map;
+      // Paint before revealing the canvas. Theme changes never replace the
+      // style or remount the map, preserving camera and exploration state.
+      const themeMap = () => {
+        if (!styleReady || !map?.getStyle()?.layers) return;
+        applyMapTheme(map);
+      };
+      map.on("style.load", () => {
+        styleReady = true;
+        themeMap();
+        mapContainer.dataset.themed = "true";
+      });
+      themeObserver = new MutationObserver(themeMap);
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
       map.addControl(new AttributionControl({ compact: true }), "bottom-right");
       map
         .getCanvas()
@@ -110,6 +131,7 @@ export default function NeighborhoodMap({
     return () => {
       window.clearTimeout(timeout);
       observer?.disconnect();
+      themeObserver?.disconnect();
       map?.remove();
       mapRef.current = null;
     };
@@ -132,14 +154,14 @@ export default function NeighborhoodMap({
         id: "area-fill",
         type: "fill",
         source: "illustrative-area",
-        paint: { "fill-color": "#347a80", "fill-opacity": 0.08 },
+        paint: { "fill-color": mapColor("map-area"), "fill-opacity": 0.08 },
       });
       map.addLayer({
         id: "area-border",
         type: "line",
         source: "illustrative-area",
         paint: {
-          "line-color": "#38787d",
+          "line-color": mapColor("map-area"),
           "line-width": 1.5,
           "line-opacity": 0.55,
           "line-dasharray": [3, 3],
@@ -270,14 +292,14 @@ export default function NeighborhoodMap({
         type: "line",
         source: "mock-route",
         layout: { "line-join": "round", "line-cap": "round" },
-        paint: { "line-color": "#ffffff", "line-width": 8 },
+        paint: { "line-color": mapColor("map-route-casing"), "line-width": 8 },
       });
       map.addLayer({
         id: "route-line",
         type: "line",
         source: "mock-route",
         layout: { "line-join": "round", "line-cap": "round" },
-        paint: { "line-color": "#24585d", "line-width": 4 },
+        paint: { "line-color": mapColor("map-route"), "line-width": 4 },
       });
     }
   }, [ready, route]);

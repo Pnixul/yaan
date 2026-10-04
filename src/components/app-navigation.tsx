@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bookmark, Compass, Home, UserRound, Waves } from "lucide-react";
+import { ThemeControl } from "@/components/theme-control";
 
 const destinations = [
   { href: "/", label: "Home", icon: Home },
@@ -42,6 +43,7 @@ export function AppNavigation() {
       <span className="site-prototype">
         Prototype <span>· Bangkok</span>
       </span>
+      <ThemeControl />
     </header>
   );
 }

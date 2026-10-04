@@ -55,7 +55,7 @@ export function AuthForm({
         <input type="hidden" name="next" value={next} />
         {state.confirmation && signingUp && (
           <div
-            className="account-message"
+            className="account-message account-success"
             role="status"
             tabIndex={-1}
             ref={feedback}

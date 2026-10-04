@@ -15,14 +15,17 @@
 }
 .saved-heading > p:last-child {
   font-size: 14px;
-  color: #5e7066;
+  color: var(--muted-foreground);
 }
 .saved-storage-note {
   margin: 23px 0 30px;
   font-size: 12px;
-  color: #5e7066;
+  color: var(--muted-foreground);
   line-height: 1.8;
   max-width: 470px;
+}
+.saved-storage-note[role="alert"] {
+  color: var(--destructive);
 }
 .saved-list-heading {
   display: flex;
@@ -37,18 +40,18 @@
 }
 .saved-list-heading > span {
   font-size: 11px;
-  color: #5e7066;
+  color: var(--muted-foreground);
 }
 .saved-list li {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  border-top: 1px solid #dce3d7;
+  border-top: 1px solid var(--border);
   padding: 12px 0;
   column-gap: 8px;
 }
 .saved-list li:last-child {
-  border-bottom: 1px solid #dce3d7;
+  border-bottom: 1px solid var(--border);
 }
 .saved-place-link {
   display: flex;
@@ -72,7 +75,7 @@
 .saved-place-name small {
   display: block;
   font-size: 11px;
-  color: #5e7066;
+  color: var(--muted-foreground);
   line-height: 1.8;
   margin-top: 4px;
 }
@@ -81,11 +84,11 @@
 }
 .saved-place-link > svg {
   flex-shrink: 0;
-  color: #4f7568;
+  color: var(--muted-foreground);
   width: 16px;
 }
 .saved-place-link:hover strong {
-  color: #24585d;
+  color: var(--primary);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -99,18 +102,18 @@
   min-height: 52px;
   padding: 6px;
   border-radius: 8px;
-  color: #4c6960;
+  color: var(--destructive);
   font-size: 10px;
 }
 .saved-remove:hover {
-  background: #e7eee6;
+  background: var(--destructive-soft);
 }
 .saved-empty {
   padding: 28px 0 20px;
-  border-top: 1px solid #dce3d7;
+  border-top: 1px solid var(--border);
 }
 .saved-empty > svg {
-  color: #4f7568;
+  color: var(--muted-foreground);
   margin-bottom: 22px;
 }
 .saved-empty h2 {
@@ -120,7 +123,7 @@
 }
 .saved-empty p {
   max-width: 360px;
-  color: #5e7066;
+  color: var(--muted-foreground);
   line-height: 1.85;
   font-size: 14px;
   margin-top: 12px;
@@ -139,8 +142,8 @@
     height: 42px;
     flex-shrink: 0;
     border-radius: 10px;
-    background: #e9eee3;
-    color: #4f7568;
+    background: var(--secondary);
+    color: var(--muted-foreground);
   }
   .saved-place-link {
     gap: 18px;

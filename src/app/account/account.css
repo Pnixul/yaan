@@ -17,7 +17,7 @@
 .account-note {
   font-size: 14px;
   line-height: 1.75;
-  color: #5e7066;
+  color: var(--muted-foreground);
 }
 .account-content {
   margin-top: 30px;
@@ -29,19 +29,19 @@
 .account-modes {
   display: flex;
   gap: 8px;
-  border-bottom: 1px solid #dce3d7;
+  border-bottom: 1px solid var(--border);
   margin-bottom: 24px;
 }
 .account-modes button {
   min-height: 46px;
   padding: 10px 18px;
   border-bottom: 2px solid transparent;
-  color: #5e7066;
+  color: var(--muted-foreground);
   font-size: 14px;
 }
 .account-modes button[aria-pressed="true"] {
-  color: #24585d;
-  border-color: #24585d;
+  color: var(--primary);
+  border-color: var(--primary);
   font-weight: 650;
 }
 .account-modes button:focus-visible {
@@ -64,16 +64,16 @@
   width: 100%;
   min-width: 0;
   min-height: 48px;
-  border: 1px solid #a7b6ae;
+  border: 1px solid var(--input);
   border-radius: 8px;
-  background: #fff;
+  background: var(--surface-elevated);
   padding: 10px 12px;
   font-size: 16px;
 }
 .account-field > p {
   font-size: 12px;
   line-height: 1.6;
-  color: #5e7066;
+  color: var(--muted-foreground);
 }
 .account-button {
   display: inline-flex;
@@ -82,8 +82,8 @@
   min-height: 48px;
   border-radius: 8px;
   padding: 12px 18px;
-  background: #24585d;
-  color: #fff;
+  background: var(--primary);
+  color: var(--primary-foreground);
   font-size: 14px;
   font-weight: 600;
 }
@@ -99,16 +99,23 @@
 }
 .account-modes button:disabled {
   cursor: wait;
-  opacity: 0.6;
 }
 .account-button:hover:not(:disabled) {
-  background: #1c464a;
+  background: var(--primary-hover);
+}
+.account-button:active:not(:disabled) {
+  background: var(--primary-pressed);
+}
+.account-message.account-success {
+  color: var(--success);
+  background: var(--success-soft);
+  border-color: var(--success-border);
 }
 .account-message {
   padding: 16px;
-  border: 1px solid #d4dfd6;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #edf1e9;
+  background: var(--secondary);
   font-size: 14px;
   line-height: 1.7;
   overflow-wrap: anywhere;
@@ -121,10 +128,11 @@
 .account-message p + p {
   margin-top: 12px;
 }
-.account-error {
-  color: #783c2e;
-  background: #fbf1ec;
-  border-color: #dbb8a9;
+.account-error,
+.account-message[role="alert"] {
+  color: var(--destructive);
+  background: var(--destructive-soft);
+  border-color: var(--destructive-border);
 }
 .account-content > .account-message {
   margin-bottom: 20px;
@@ -143,7 +151,7 @@
 .account-note {
   margin-top: 28px;
   padding-top: 22px;
-  border-top: 1px solid #dce3d7;
+  border-top: 1px solid var(--border);
 }
 .account-page .home-explore-link {
   margin-top: 16px;

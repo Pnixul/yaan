@@ -55,6 +55,7 @@ export function SavePlaceButton({ place }: { place: MockPlace }) {
           type="button"
           className="save-place-button"
           disabled={!ready || pending}
+          aria-pressed={ready ? saved : undefined}
           aria-label={`${saved ? "Unsave" : "Save"} ${place.name}`}
           onClick={async () => {
             setAnnouncement("");

@@ -50,6 +50,14 @@ Do not introduce an additional full UI framework by default.
 
 Reusable components should follow YAAN's own design language.
 
+### Theme and Color Foundation
+
+`src/app/tokens.css` is the shared semantic palette for Light and Dark, consumed by the existing CSS and Tailwind token aliases. The root `data-theme="light|dark"` attribute selects colors and native `color-scheme`. Preserve existing component/layout boundaries; theme support does not require an application-wide client provider or additional dependency.
+
+`src/lib/theme.ts` owns preference resolution and subscriptions. `yaan.theme` in localStorage stores only `light`, `dark`, or `system`; missing/invalid values resolve to System. Explicit Light/Dark overrides the OS. System follows `prefers-color-scheme` live, and storage events synchronize other tabs. Blocked storage falls back to System on initial load and permits in-memory page-session changes. This key contains no auth or location data.
+
+A small static inline head script in the server root layout sets the resolved theme before body paint. Hydration suppression is limited to the root element's intentional attributes; the select uses `useSyncExternalStore` with a stable System server snapshot. This avoids a theme cookie/request dependency and keeps Home statically renderable. Without JavaScript, the readable Light palette is the fallback. If a strict CSP is introduced, allow this exact bootstrap with a hash/nonce rather than enabling arbitrary inline scripts. `scripts/theme.test.mjs` covers bootstrap/runtime parity, preference events, blocked storage, core token contrast, and map paint isolation.
+
 ---
 
 ## Backend & Database
@@ -151,6 +159,10 @@ The provider may be selected separately based on:
 - customization requirements.
 
 Avoid tightly coupling application logic to one tile provider.
+
+The current development basemap remains OpenFreeMap Positron (`src/lib/map-config.ts`). `src/lib/map-theme.ts` adapts its observed vector source/layer roles to the same CSS map tokens. It changes paint in place on style load and root theme changes, preserving sources, filters, zoom-dependent widths, attribution, mock geometries, camera, and selection. The canvas is revealed after its initial theme is applied, avoiding a light-map flash in Dark Mode.
+
+Provider limitations: geographic feature availability, label languages/density and zoom rules remain controlled by the external style/tiles. Raster road-shield sprites retain their original appearance and dark numerals, including in Dark Mode. The adapter recognizes Positron's current layer IDs and `openmaptiles` source; upstream schema changes may require updating it. No tile, routing, geocoding, or flood-data provider was added. Detailed label/marker collision behavior, panel scrolling, and mobile sheet refinement remain Visual Polish Pass 2B work.
 
 ---
 

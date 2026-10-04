@@ -38,6 +38,10 @@ Reserve space for the mobile navigation and safe-area inset: it must not cover d
 
 Saved offers account-owned lists with links back to Explore, or a sign-in state for signed-out visitors. Account offers sign in and sign up without introducing an authentication gate elsewhere.
 
+### Appearance
+
+A labelled Theme control in the shared header offers Light, Dark, and System on every route, including mobile. Default to System; follow OS changes while System is selected. Remember the explicit preference in this browser, independently of authentication. Use a native keyboard-accessible select, keep visible focus, and show the selected preference in text. Theme changes preserve the current URL, reference, selected place, route, camera, and pending actions. If browser storage is blocked, changes still apply for the current page session.
+
 ---
 
 ## Map-First Experience

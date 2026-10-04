@@ -145,9 +145,15 @@ Bottom sheets and drawers may be useful for map-based interactions, especially o
 
 ## Color
 
-The final brand palette is intentionally not fixed yet.
+Visual Polish Pass 2A establishes a deep-blue-led foundation: calm, clean, geographic, and comfortable for extended use. Blue is deliberate emphasis for primary actions, navigation, selected states, focus, and map interactions. Avoid large saturated blue surfaces.
 
-Color should eventually support:
+`src/app/tokens.css` owns semantic colors for both themes. Page, surface, and elevated surface are distinct; Light uses cool off-white / blue-gray with navy text, while Dark uses layered navy / blue-black with soft light text. Elevated Light controls can use white. Primary, hover, pressed, subtle, secondary, focus, disabled, destructive, success, warning, chart, and map tokens carry consistent meaning across routes. Component styles should consume these tokens rather than introduce local color literals.
+
+Primary actions use a filled blue treatment. Secondary and utility actions use restrained surfaces or text; selected states also use labels, weight, borders, or marker shape. Keep amber warnings, green success feedback, and red errors/removal actions. Missing data uses neutral styling and explicit wording, never success styling.
+
+The basemap uses muted blue water, green parks, distinct building footprints, and differentiated major/minor roads. Dark Mode has its own map palette. Reference pins, numbered ordinary places, selected places with visible labels, warm report dots, and route casing preserve distinct roles. The basemap remains quieter than interactive overlays.
+
+Color supports:
 
 - YAAN's brand identity;
 - map readability;
@@ -415,7 +421,7 @@ Brand exploration may include:
 - illustration style;
 - map styling.
 
-These remain open design decisions until intentionally defined.
+Color and theme direction are established above. Other brand decisions remain open until intentionally defined.
 
 ---
 
