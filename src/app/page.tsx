@@ -1,3 +1,4 @@
+import { Message } from "@/components/i18n";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -8,6 +9,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { HomeSearch } from "@/components/home-search";
+import { ThemeIllustration } from "@/components/theme-illustration";
 import { MOCK_AREAS } from "@/lib/mock-locations";
 import "./home.css";
 
@@ -21,33 +23,50 @@ export default function Home() {
   return (
     <main id="main-content" tabIndex={-1} className="home-page">
       <div className="home-intro">
+        <div className="home-atmosphere" aria-hidden="true">
+          <ThemeIllustration kind="home" />
+        </div>
         <section className="home-hero" aria-labelledby="home-title">
           <p className="eyebrow">
-            <MapPin size={14} /> A little context. A better sense of place.
+            <MapPin size={14} />{" "}
+            <Message text={"A little context. A better sense of place."} />{" "}
           </p>
           <h1 id="home-title">
-            A place is more
-            <br />
-            than an <em>address.</em>
+            <Message text={"A place is more"} /> <br />
+            <Message text={"than an"} />{" "}
+            <em>
+              <Message text={"address."} />
+            </em>
           </h1>
           <p className="home-lede">
-            Get to know life around a location. Find everyday places, see how
-            far they are, and understand the area’s history.
+            <Message
+              text={
+                "Get to know life around a location. Find everyday places, see how far they are, and understand the area’s history."
+              }
+            />{" "}
           </p>
           <div className="home-search-section">
-            <h2>Where would you like to explore?</h2>
+            <h2>
+              <Message text={"Where would you like to explore?"} />
+            </h2>
             <HomeSearch />
           </div>
         </section>
         <section className="home-examples" aria-labelledby="examples-title">
           <div className="examples-heading">
-            <span className="eyebrow">A starting point</span>
+            <span className="eyebrow">
+              <Message text={"A starting point"} />
+            </span>
             <span className="examples-city">
-              Bangkok <span lang="th">กรุงเทพฯ</span>
+              <Message text={"Bangkok"} />
             </span>
           </div>
-          <h2 id="examples-title">Try a neighbourhood.</h2>
-          <p>Choose an area, then find your place in it.</p>
+          <h2 id="examples-title">
+            <Message text={"Try a neighbourhood."} />
+          </h2>
+          <p>
+            <Message text={"Choose an area, then find your place in it."} />
+          </p>
           <div className="example-locations">
             {examples.map((example, index) => {
               const area = MOCK_AREAS.find((area) => area.id === example.id)!;
@@ -64,7 +83,9 @@ export default function Home() {
                     <strong>
                       {area.name} <span lang="th">{area.thaiName}</span>
                     </strong>
-                    <small>{example.description}</small>
+                    <small>
+                      <Message text={example.description} />
+                    </small>
                   </span>
                   <ArrowUpRight size={20} aria-hidden="true" />
                 </Link>
@@ -72,54 +93,81 @@ export default function Home() {
             })}
           </div>
           <p className="examples-note">
-            Sample places and context, ready to explore.
+            <Message
+              text={"Sample places and context, ready to explore."}
+            />{" "}
           </p>
         </section>
       </div>
       <section className="home-context" aria-labelledby="context-title">
         <div className="home-context-heading">
-          <p className="eyebrow">Beyond the address</p>
-          <h2 id="context-title">Picture your everyday.</h2>
-          <p>Whether it’s somewhere new or the place you already call home.</p>
+          <p className="eyebrow">
+            <Message text={"Beyond the address"} />
+          </p>
+          <h2 id="context-title">
+            <Message text={"Picture your everyday."} />
+          </h2>
+          <p>
+            <Message
+              text={
+                "Whether it’s somewhere new or the place you already call home."
+              }
+            />
+          </p>
         </div>
         <div className="home-context-list">
           <article>
             <Coffee size={23} strokeWidth={1.5} />
-            <h3>The things you need</h3>
+            <h3>
+              <Message text={"The things you need"} />
+            </h3>
             <p>
-              Food, transport, parks and everyday essentials around your
-              reference location.
+              <Message
+                text={
+                  "Food, transport, parks and everyday essentials around your reference location."
+                }
+              />{" "}
             </p>
           </article>
           <article>
             <Footprints size={23} strokeWidth={1.5} />
-            <h3>A sense of distance</h3>
+            <h3>
+              <Message text={"A sense of distance"} />
+            </h3>
             <p>
-              Approximate travel times and route previews to put nearby places
-              in perspective.
+              <Message
+                text={
+                  "Approximate travel times and route previews to put nearby places in perspective."
+                }
+              />{" "}
             </p>
           </article>
           <article>
             <CloudSun size={23} strokeWidth={1.5} />
-            <h3>The area’s story</h3>
+            <h3>
+              <Message text={"The area’s story"} />
+            </h3>
             <p>
-              Look at historical flood reports, with the context and limitations
-              kept in view.
+              <Message
+                text={
+                  "Look at historical flood reports, with the context and limitations kept in view."
+                }
+              />{" "}
             </p>
           </article>
         </div>
         <Link className="home-explore-link" href="/explore">
-          Open Explore <ArrowRight size={18} />
+          <Message text={"Open Explore"} /> <ArrowRight size={18} />
         </Link>
       </section>
       <footer className="home-footer">
         <p>
-          <span lang="th">ย่าน</span> YAAN means neighbourhood.
+          <span lang="th">ย่าน</span>{" "}
+          <Message text={"YAAN means neighbourhood."} />{" "}
         </p>
         <p>
-          A working prototype with sample data.
-          <br />
-          Explore freely. No sign-in needed.
+          <Message text={"A working prototype with sample data."} /> <br />
+          <Message text={"Explore freely. No sign-in needed."} />{" "}
         </p>
       </footer>
     </main>

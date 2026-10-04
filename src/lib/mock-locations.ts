@@ -193,11 +193,14 @@ export function monthCounts(reports: MockReport[]) {
   );
 }
 
-export function formatReportDate(date: string) {
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(`${date}T00:00:00Z`));
+export function formatReportDate(date: string, language: "th" | "en" = "en") {
+  return new Intl.DateTimeFormat(
+    language === "th" ? "th-TH-u-ca-gregory" : "en-GB",
+    {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    },
+  ).format(new Date(`${date}T00:00:00Z`));
 }

@@ -1,10 +1,13 @@
 "use client";
 
+import { useI18n } from "@/components/i18n";
+
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { LocationSearch } from "@/components/location-search";
 
 export function HomeSearch() {
+  const { t } = useI18n();
   const router = useRouter();
   const container = useRef<HTMLDivElement>(null);
   return (
@@ -25,7 +28,7 @@ export function HomeSearch() {
           router.push(`/explore?${params}`);
         }}
       />
-      <p>Try Ari, Thong Lo or Lat Krabang. Sample locations only.</p>
+      <p>{t("Try Ari, Thong Lo or Lat Krabang. Sample locations only.")}</p>
     </div>
   );
 }

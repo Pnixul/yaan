@@ -1,6 +1,9 @@
 "use client";
+
+import { useI18n, Message } from "@/components/i18n";
+
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight, MapPin, X } from "lucide-react";
 import { LocationSearch } from "@/components/location-search";
 import { LocationResult } from "@/components/location-result";
@@ -21,11 +24,14 @@ const NeighborhoodMap = dynamic(() => import("@/components/neighborhood-map"), {
   loading: () => (
     <div className="map-loading" role="status">
       <MapPin size={24} />
-      <span>Finding our bearings…</span>
+      <span>
+        <Message text={"Finding our bearings…"} />
+      </span>
     </div>
   ),
 });
 export function MapExperience() {
+  const { t } = useI18n();
   const { state, dispatch, href } = useExploreNavigation();
   const [previousHref, setPreviousHref] = useState(href);
   const [expanded, setExpanded] = useState(
@@ -38,6 +44,16 @@ export function MapExperience() {
     );
   }
   const [showReports, setShowReports] = useState(true);
+  const routeHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (
+      state.routing &&
+      !expanded &&
+      window.matchMedia("(max-width: 767px)").matches
+    ) {
+      routeHeading.current?.focus({ preventScroll: true });
+    }
+  }, [state.routing, expanded]);
   const area = MOCK_AREAS.find((item) => item.id === state.areaId)!;
   const reference =
     MOCK_PLACES.find((item) => item.id === state.referenceId) ?? null;
@@ -69,14 +85,20 @@ export function MapExperience() {
     () => (reference && selected ? buildMockRoute(reference, selected) : null),
     [reference, selected],
   );
-  const inspect = useCallback((place: MockPlace) => {
-    dispatch({ type: "inspect", place });
-    setExpanded(true);
-  }, [dispatch]);
-  const openReport = useCallback((report: MockReport) => {
-    dispatch({ type: "report", report });
-    setExpanded(true);
-  }, [dispatch]);
+  const inspect = useCallback(
+    (place: MockPlace) => {
+      dispatch({ type: "inspect", place });
+      setExpanded(true);
+    },
+    [dispatch],
+  );
+  const openReport = useCallback(
+    (report: MockReport) => {
+      dispatch({ type: "report", report });
+      setExpanded(true);
+    },
+    [dispatch],
+  );
   function search(result: SearchResult) {
     if (result.kind === "area") {
       dispatch({ type: "area", id: result.id });
@@ -89,13 +111,37 @@ export function MapExperience() {
   return (
     <main id="main-content" tabIndex={-1} className="yaan-app">
       <a href="#area-summary" className="skip-link">
-        Skip to location details
+        {t("Skip to location details")}{" "}
       </a>
       <div className="explore-layout">
         <LocationResult
           area={area}
           reference={reference}
           expanded={expanded}
+          mobileRoutePreview={
+            state.routing && route && reference && selected ? (
+              <>
+                <h2 ref={routeHeading} tabIndex={-1}>
+                  {t("Walking route")}
+                </h2>
+                <p>
+                  {reference.name} → {selected.name}
+                </p>
+                <strong>
+                  {t("Sample route · ~{minutes} min walk", {
+                    minutes: route.walkMinutes,
+                  })}
+                </strong>
+                <p>{t("Illustrative route · Not for navigation")}</p>
+                <button
+                  className="text-button"
+                  onClick={() => dispatch({ type: "clear-route" })}
+                >
+                  <X size={16} /> {t("Clear route")}
+                </button>
+              </>
+            ) : undefined
+          }
           view={state.view}
           contentKey={[
             area.id,
@@ -118,11 +164,13 @@ export function MapExperience() {
           {state.view === "conditions" ? (
             <>
               <div className="condition-heading">
-                <span className="eyebrow">Area context</span>
-                <h2>Flood history</h2>
+                <span className="eyebrow">{t("Area context")}</span>
+                <h2>{t("Flood history")}</h2>
                 <p>
-                  Around {area.name}. Area-level evidence, not a building
-                  assessment.
+                  {t(
+                    "Around {name}. Area-level evidence, not a building assessment.",
+                    { name: area.name },
+                  )}
                 </p>
               </div>
               <FloodContext
@@ -163,7 +211,7 @@ export function MapExperience() {
         </LocationResult>
         <section
           className="map-section"
-          aria-label="Explore Bangkok neighbourhoods"
+          aria-label={t("Explore Bangkok neighbourhoods")}
         >
           <NeighborhoodMap
             location={area}
@@ -195,18 +243,18 @@ export function MapExperience() {
               <div className="map-intro">
                 <span className="eyebrow">
                   {state.view === "conditions"
-                    ? "One part of the bigger picture"
-                    : "A closer look at Bangkok"}
+                    ? t("One part of the bigger picture")
+                    : t("A closer look at Bangkok")}
                 </span>
                 <p>
                   {state.view === "conditions"
                     ? "The area’s history."
-                    : "Where will your day begin?"}
+                    : t("Where will your day begin?")}
                   <br />
                   <span>
                     {state.view === "conditions"
-                      ? "Context, not a prediction."
-                      : "Choose a place to explore around."}
+                      ? t("Context, not a prediction.")
+                      : t("Choose a place to explore around.")}
                   </span>
                 </p>
               </div>
@@ -216,7 +264,7 @@ export function MapExperience() {
             {state.view === "conditions" ? (
               <>
                 <span className="legend-area" />
-                <span>Illustrative area</span>
+                <span>{t("Illustrative area")}</span>
                 <span className="legend-divider" />
                 <button
                   aria-pressed={showReports}
@@ -225,50 +273,64 @@ export function MapExperience() {
                   <span
                     className={`legend-dot${showReports ? "" : " is-hidden"}`}
                   />
-                  Mock reports{" "}
+                  {t("Mock reports")}{" "}
                   <span className="legend-count">{area.reports.length}</span>
                 </button>
               </>
             ) : state.routing && route ? (
               <>
                 <span className="legend-route" />
-                <span>Mock route · ~{route.walkMinutes} min walk</span>
+                <span>
+                  {t("Sample route · ~{minutes} min walk", {
+                    minutes: route.walkMinutes,
+                  })}
+                </span>
                 <span className="legend-divider" />
                 <button
-                  aria-label="Clear route preview"
+                  aria-label={t("Clear route preview")}
                   onClick={() => dispatch({ type: "clear-route" })}
                 >
-                  <X size={14} /> Clear
+                  <X size={14} /> {t("Clear")}{" "}
                 </button>
               </>
             ) : (
               <>
                 <span className="legend-reference" />
-                <span>{reference ? "Your reference" : "Sample places"}</span>
+                <span>
+                  {reference ? t("Your reference") : t("Sample places")}
+                </span>
                 <span className="legend-divider" />
                 <span
                   className={state.routing ? "legend-route" : "legend-poi"}
                 />
                 <span>
-                  {state.routing ? "Mock walking route" : "Everyday places"}
+                  {state.routing
+                    ? t("Mock walking route")
+                    : t("Everyday places")}
                 </span>
               </>
             )}
           </div>
           <div className="map-caption">
             <ArrowUpRight size={15} />
-            <span>Places, journeys & area context · All sample data</span>
+            <span>
+              {t("Places, journeys & area context · All sample data")}
+            </span>
           </div>
         </section>
       </div>
       <div className="sr-only" role="status">
         {reference
-          ? `Exploring around ${reference.name}.`
-          : `Exploring ${area.name}. Choose a reference place.`}{" "}
+          ? t("Exploring around {name}", { name: reference.name })
+          : t("Exploring {name}. Choose a reference place.", {
+              name: area.name,
+            })}{" "}
         {state.view === "nearby"
-          ? `${places.length} sample places.`
-          : "Mock flood context."}{" "}
-        {state.routing && selected ? `Route preview to ${selected.name}.` : ""}
+          ? t("{count} sample places.", { count: places.length })
+          : t("Mock flood context.")}{" "}
+        {state.routing && selected
+          ? t("Route preview to {name}.", { name: selected.name })
+          : ""}
       </div>
     </main>
   );

@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/components/i18n";
+
 import {
   Coffee,
   TrainFront,
@@ -38,11 +40,12 @@ export function CategoryControls({
   selected: Category;
   onChange: (category: Category) => void;
 }) {
+  const { t } = useI18n();
   return (
     <div
       className="category-controls"
       role="group"
-      aria-label="Nearby place category"
+      aria-label={t("Nearby place category")}
     >
       {CATEGORIES.map((category) => {
         const Icon = categoryIcons[category.id];
@@ -53,7 +56,7 @@ export function CategoryControls({
             onClick={() => onChange(category.id)}
           >
             <Icon size={15} aria-hidden="true" />
-            {category.label}
+            {t(category.label)}
           </button>
         );
       })}

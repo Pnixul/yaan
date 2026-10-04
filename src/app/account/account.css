@@ -3,6 +3,31 @@
   margin: 0 auto;
   padding: 36px 24px 48px;
 }
+.account-page:not(:has(.auth-composition)) {
+  max-width: 640px;
+}
+.auth-content {
+  min-width: 0;
+}
+.auth-content > .account-message {
+  margin-bottom: 24px;
+}
+.auth-visual {
+  display: none;
+}
+.signed-in-account {
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.signed-in-account .account-message {
+  margin-bottom: 24px;
+}
+.signed-in-account .account-onward {
+  margin-top: 32px;
+}
+.signed-in-account .account-signout {
+  margin-top: 24px;
+}
 .account-heading .eyebrow {
   font-size: 11px;
 }
@@ -160,5 +185,54 @@
   .account-page {
     padding-top: 64px;
     padding-bottom: 80px;
+  }
+}
+@media (min-width: 1000px) {
+  .account-page:has(.auth-composition) {
+    max-width: 1120px;
+    position: relative;
+    padding-right: 560px;
+    min-height: 760px;
+  }
+  .account-page:has(.auth-composition) .account-heading {
+    padding-top: 8px;
+  }
+  .auth-visual {
+    display: block;
+    position: absolute;
+    top: 40px;
+    right: 24px;
+    bottom: 40px;
+    width: 460px;
+    min-height: 620px;
+    border-radius: calc(var(--radius) * 2);
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .auth-visual .theme-illustration {
+    object-fit: cover;
+    object-position: center bottom;
+  }
+  .auth-visual::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(var(--background), transparent 62%);
+  }
+  .auth-visual-copy {
+    position: relative;
+    z-index: 1;
+    padding: 40px 32px;
+  }
+  .auth-visual-copy h2 {
+    font-size: 30px;
+    line-height: 1.5;
+    max-width: 340px;
+  }
+  .auth-visual-copy p {
+    margin-top: 16px;
+    line-height: 1.8;
+    font-size: 15px;
+    max-width: 340px;
   }
 }

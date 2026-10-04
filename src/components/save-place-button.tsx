@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/components/i18n";
+
 import { Bookmark, BookmarkCheck } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 import type { MockPlace } from "@/lib/mock-places";
@@ -7,6 +9,7 @@ import { useSavedPlaces } from "@/lib/saved-places";
 import { beginSave, type IntentState } from "@/app/account/intent-actions";
 
 export function SavePlaceButton({ place }: { place: MockPlace }) {
+  const { t } = useI18n();
   const { ids, ready, mode, pending, error, toggle, reload } = useSavedPlaces();
   const [authState, authAction, authPending] = useActionState<
     IntentState,
@@ -34,10 +37,10 @@ export function SavePlaceButton({ place }: { place: MockPlace }) {
             type="submit"
             className="save-place-button"
             disabled={authPending}
-            aria-label={`Sign in to save ${place.name}`}
+            aria-label={t("Sign in to save {name}", { name: place.name })}
           >
             <Bookmark size={17} aria-hidden="true" />{" "}
-            {authPending ? "Opening sign in…" : "Sign in to save"}
+            {authPending ? t("Opening sign in…") : t("Sign in to save")}
           </button>
           {authState.error && (
             <p
@@ -46,7 +49,7 @@ export function SavePlaceButton({ place }: { place: MockPlace }) {
               tabIndex={-1}
               role="alert"
             >
-              {authState.error}
+              {t(authState.error)}
             </p>
           )}
         </form>
@@ -56,41 +59,48 @@ export function SavePlaceButton({ place }: { place: MockPlace }) {
           className="save-place-button"
           disabled={!ready || pending}
           aria-pressed={ready ? saved : undefined}
-          aria-label={`${saved ? "Unsave" : "Save"} ${place.name}`}
+          aria-label={t(saved ? "Unsave {name}" : "Save {name}", {
+            name: place.name,
+          })}
           onClick={async () => {
             setAnnouncement("");
             if (!(await toggle(place.id))) return;
             setAnnouncement(
-              `${place.name} ${saved ? "removed from" : "added to"} Saved Places.`,
+              t(
+                saved
+                  ? "{name} removed from Saved Places."
+                  : "{name} added to Saved Places.",
+                { name: place.name },
+              ),
             );
           }}
         >
           <Icon size={17} aria-hidden="true" />{" "}
           {!ready
             ? error
-              ? "Save unavailable"
-              : "Checking…"
+              ? t("Save unavailable")
+              : t("Checking…")
             : pending
               ? saved
-                ? "Removing…"
-                : "Saving…"
+                ? t("Removing…")
+                : t("Saving…")
               : saved
-                ? "Unsave"
-                : "Save"}
+                ? t("Unsave")
+                : t("Save")}
         </button>
       )}
       <span className="sr-only" role="status">
-        {authPending ? "Opening sign in to save this place." : announcement}
+        {authPending ? t("Opening sign in to save this place.") : announcement}
       </span>
       {error && (
         <div className="save-storage-note" role="alert">
-          <p>{error}</p>
+          <p>{t(error)}</p>
           <button
             type="button"
             className="text-button"
             onClick={() => void reload()}
           >
-            {ready ? "Reload saved state" : "Try again"}
+            {ready ? t("Reload saved state") : t("Try again")}
           </button>
         </div>
       )}

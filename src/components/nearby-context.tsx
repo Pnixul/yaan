@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/components/i18n";
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -52,9 +54,13 @@ export function NearbyContext({
   onClearRoute,
   onClose,
 }: Props) {
+  const { t, language } = useI18n();
   const title = useRef<HTMLHeadingElement>(null);
+  const previousSelection = useRef(selected);
   useEffect(() => {
-    if (selected) title.current?.focus({ preventScroll: true });
+    if (selected || previousSelection.current)
+      title.current?.focus({ preventScroll: true });
+    previousSelection.current = selected;
   }, [selected, routing]);
   if (selected) {
     const Icon = categoryIcons[selected.category];
@@ -64,20 +70,20 @@ export function NearbyContext({
         <div className="place-detail-toolbar">
           <button className="text-button" onClick={onClose}>
             <ArrowLeft size={16} />
-            {reference ? "Back to nearby" : "Back to area"}
+            {reference ? t("Back to nearby") : t("Back to area")}
           </button>
           <SavePlaceButton key={selected.id} place={selected} />
         </div>
         <div className="place-detail-category">
           <Icon size={20} />
-          <span>{categoryLabel(selected.category)}</span>
-          <span className="sample-tag">Sample place</span>
+          <span>{t(categoryLabel(selected.category))}</span>
+          <span className="sample-tag">{t("Sample place")}</span>
         </div>
         <h2 ref={title} tabIndex={-1}>
-          {routing ? "Walking route" : selected.name}
+          {routing ? t("Walking route") : selected.name}
         </h2>
         {!routing && (
-          <p className="place-description">{selected.description}</p>
+          <p className="place-description">{t(selected.description)}</p>
         )}
         {route && reference && (
           <>
@@ -85,12 +91,12 @@ export function NearbyContext({
               <span>
                 <i />
                 {reference.name}
-                <small>Your reference location</small>
+                <small>{t("Your reference location")}</small>
               </span>
               <span>
                 <MapPin size={15} />
                 {selected.name}
-                <small>Destination</small>
+                <small>{t("Destination")}</small>
               </span>
             </div>
             <div className="journey-stats">
@@ -98,39 +104,42 @@ export function NearbyContext({
                 <Footprints size={19} />
                 <strong>
                   ~{route.walkMinutes}
-                  <small> min walk</small>
+                  <small> {t("min walk")}</small>
                 </strong>
-                <span>{formatDistance(route.meters)} · Sample route</span>
+                <span>
+                  {formatDistance(route.meters, language)} · {t("Sample route")}
+                </span>
               </div>
               <div>
                 <Car size={19} />
                 <strong>
                   ~{route.driveMinutes}
-                  <small> min drive</small>
+                  <small> {t("min drive")}</small>
                 </strong>
-                <span>Illustrative · No traffic data</span>
+                <span>{t("Illustrative · No traffic data")}</span>
               </div>
             </div>
             {routing ? (
               <div className="route-active">
                 <span>
-                  <Route size={16} /> Walking route preview
+                  <Route size={16} /> {t("Walking route preview")}{" "}
                 </span>
                 <button className="text-button" onClick={onClearRoute}>
-                  <X size={16} /> Clear route
+                  <X size={16} /> {t("Clear route")}{" "}
                 </button>
               </div>
             ) : (
               <button className="primary-button" onClick={onDirections}>
                 <span>
-                  <Navigation size={17} /> Directions
+                  <Navigation size={17} /> {t("Directions")}{" "}
                 </span>
                 <ArrowRight size={17} />
               </button>
             )}
             <p className="journey-disclaimer">
-              Mock route and approximate times. Paths and access are unverified;
-              this preview is not navigation guidance.
+              {t(
+                "Mock route and approximate times. Paths and access are unverified; this preview is not navigation guidance.",
+              )}{" "}
             </p>
           </>
         )}
@@ -143,13 +152,13 @@ export function NearbyContext({
             }
             onClick={() => onReference(selected)}
           >
-            <MapPin size={17} /> Explore around this place{" "}
+            <MapPin size={17} /> {t("Explore around this place")}{" "}
             <ArrowRight size={16} />
           </button>
         )}
         {isReference && (
           <p className="reference-confirmation">
-            <MapPin size={16} /> You’re exploring around this place.
+            <MapPin size={16} /> {t("You’re exploring around this place.")}{" "}
           </p>
         )}
       </section>
@@ -159,18 +168,25 @@ export function NearbyContext({
     <section
       className="nearby-overview"
       aria-label={
-        reference ? "Nearby everyday places" : "Choose a reference location"
+        reference
+          ? t("Nearby everyday places")
+          : t("Choose a reference location")
       }
     >
       <div className="nearby-section-heading">
         <div>
           <span className="eyebrow">
-            {reference ? "Your everyday surroundings" : "Start with a place"}
-          </span>
-          <h2>
             {reference
-              ? CATEGORIES.find((item) => item.id === category)?.label
-              : "Where will your day begin?"}
+              ? t("Your everyday surroundings")
+              : t("Start with a place")}
+          </span>
+          <h2 ref={title} tabIndex={-1}>
+            {reference
+              ? t(
+                  CATEGORIES.find((item) => item.id === category)?.label ??
+                    "Essentials",
+                )
+              : t("Where will your day begin?")}
           </h2>
         </div>
         <span className="nearby-count">
@@ -179,8 +195,10 @@ export function NearbyContext({
       </div>
       <p className="nearby-intro">
         {reference
-          ? "A few useful places, measured from your starting point."
-          : "Choose a station, workplace, home, or campus as your reference."}
+          ? t("A few useful places, measured from your starting point.")
+          : t(
+              "Choose a station, workplace, home, or campus as your reference.",
+            )}
       </p>
       <ul className="nearby-list">
         {places.map((place) => {
@@ -195,14 +213,16 @@ export function NearbyContext({
                 <span className="nearby-list-name">
                   <strong>{place.name}</strong>
                   <small>
-                    {categoryLabel(place.category)}
-                    {journey && ` · ${formatDistance(journey.meters)}`}
+                    {t(categoryLabel(place.category))}
+                    {journey &&
+                      ` · ${formatDistance(journey.meters, language)}`}
                   </small>
                 </span>
                 <span className="nearby-list-time">
                   {journey ? (
                     <>
-                      <Footprints size={14} />~{journey.walkMinutes} min
+                      <Footprints size={14} />~{journey.walkMinutes}{" "}
+                      {t("min")}{" "}
                     </>
                   ) : (
                     <ArrowRight size={16} />
@@ -215,14 +235,17 @@ export function NearbyContext({
       </ul>
       {!places.length && (
         <p className="empty-reports">
-          No other places in this sample category. Try another category; this is
-          not a complete directory.
+          {t(
+            "No other places in this sample category. Try another category; this is not a complete directory.",
+          )}{" "}
         </p>
       )}
       <p className="nearby-footnote">
         {reference
-          ? "Distances and times follow illustrative routes. Sample places only."
-          : "These are sample locations, not listings or recommendations."}
+          ? t(
+              "Distances and times follow illustrative routes. Sample places only.",
+            )
+          : t("These are sample locations, not listings or recommendations.")}
       </p>
     </section>
   );

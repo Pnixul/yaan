@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/components/i18n";
+
 import {
   startTransition,
   useActionState,
@@ -18,6 +20,7 @@ export function AuthForm({
   intentId?: string;
   next?: string;
 }) {
+  const { t } = useI18n();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [state, action, pending] = useActionState<AuthFormState, FormData>(
     authenticate,
@@ -30,15 +33,18 @@ export function AuthForm({
   }, [state]);
 
   return (
-    <section aria-label="Account access">
-      <div className="account-modes" aria-label="Sign in or create an account">
+    <section aria-label={t("Account access")}>
+      <div
+        className="account-modes"
+        aria-label={t("Sign in or create an account")}
+      >
         <button
           type="button"
           disabled={pending}
           aria-pressed={!signingUp}
           onClick={() => setMode("signin")}
         >
-          Sign in
+          {t("Sign in")}{" "}
         </button>
         <button
           type="button"
@@ -46,7 +52,7 @@ export function AuthForm({
           aria-pressed={signingUp}
           onClick={() => setMode("signup")}
         >
-          Create account
+          {t("Create account")}{" "}
         </button>
       </div>
       <form action={action} className="account-form" aria-busy={pending}>
@@ -60,28 +66,32 @@ export function AuthForm({
             tabIndex={-1}
             ref={feedback}
           >
-            <h3>Check your email</h3>
+            <h3>{t("Check your email")}</h3>
             <p>
-              If registration can proceed for {state.email}, you’ll receive a
-              confirmation link. Open it to confirm your email. You are not
-              signed in yet.
+              {t(
+                "If registration can proceed for {email}, you’ll receive a confirmation link. Open it to confirm your email. You are not signed in yet.",
+                { email: state.email ?? "" },
+              )}
             </p>
             <p>
-              Open the link in this browser.{" "}
+              {t("Open the link in this browser.")}{" "}
               {intentId
-                ? "We’ll save your place and return you to Explore. If you confirm elsewhere, come back here and sign in to finish saving."
-                : "Then you can continue using your account."}
+                ? t(
+                    "We’ll save your place and return you to Explore. If you confirm elsewhere, come back here and sign in to finish saving.",
+                  )
+                : t("Then you can continue using your account.")}
             </p>
             <p>
-              Already registered? Use Sign in. If no email arrives, check your
-              spam folder and try again later.
+              {t(
+                "Already registered? Use Sign in. If no email arrives, check your spam folder and try again later.",
+              )}{" "}
             </p>
           </div>
         )}
         {(!state.confirmation || mode === "signin") && (
           <>
             <div className="account-field">
-              <label htmlFor="account-email">Email</label>
+              <label htmlFor="account-email">{t("Email")}</label>
               <input
                 id="account-email"
                 name="email"
@@ -96,7 +106,7 @@ export function AuthForm({
               />
             </div>
             <div className="account-field">
-              <label htmlFor="account-password">Password</label>
+              <label htmlFor="account-password">{t("Password")}</label>
               <input
                 id="account-password"
                 name="password"
@@ -110,7 +120,9 @@ export function AuthForm({
               />
               {signingUp && (
                 <p id="password-hint">
-                  Use at least 8 characters. A longer, unique password is best.
+                  {t(
+                    "Use at least 8 characters. A longer, unique password is best.",
+                  )}{" "}
                 </p>
               )}
             </div>
@@ -121,20 +133,20 @@ export function AuthForm({
                 tabIndex={-1}
                 ref={feedback}
               >
-                {state.error}
+                {t(state.error)}
               </div>
             )}
             <button className="account-button" disabled={pending} type="submit">
               {pending
                 ? signingUp
-                  ? "Creating account…"
-                  : "Signing in…"
+                  ? t("Creating account…")
+                  : t("Signing in…")
                 : signingUp
-                  ? "Create account"
-                  : "Sign in"}
+                  ? t("Create account")
+                  : t("Sign in")}
             </button>
             <span className="sr-only" role="status">
-              {pending ? "Please wait while we process your request." : ""}
+              {pending ? t("Please wait while we process your request.") : ""}
             </span>
           </>
         )}
@@ -151,6 +163,7 @@ export function PendingSaveForm({
   intentId: string;
   retry: boolean;
 }) {
+  const { t } = useI18n();
   const [state, action, pending] = useActionState(finishSave, {});
   const started = useRef(false);
   const feedback = useRef<HTMLParagraphElement>(null);
@@ -175,20 +188,23 @@ export function PendingSaveForm({
             role="alert"
             className="account-message account-error"
           >
-            {state.error ??
-              "You’re signed in, but we couldn’t save the place. Retry to finish and return to Explore."}
+            {state.error
+              ? t(state.error)
+              : t(
+                  "You’re signed in, but we couldn’t save the place. Retry to finish and return to Explore.",
+                )}
           </p>
         )}
         <button className="account-button" disabled={pending} type="submit">
-          {pending ? "Saving and returning…" : "Retry save and return"}
+          {pending ? t("Saving and returning…") : t("Retry save and return")}
         </button>
         <span className="sr-only" role="status">
-          {pending ? "Saving your place…" : ""}
+          {pending ? t("Saving your place…") : ""}
         </span>
       </form>
       {state.error && (
         <a className="account-retry" href={accountIntentHref(intentId)}>
-          Check account and sign in again
+          {t("Check account and sign in again")}{" "}
         </a>
       )}
       <CancelSaveForm intentId={intentId} disabled={pending} />
@@ -203,6 +219,7 @@ function CancelSaveForm({
   intentId: string;
   disabled: boolean;
 }) {
+  const { t } = useI18n();
   const [, action, pending] = useActionState(
     async (_previous: null, form: FormData) => {
       await cancelSave(form);
@@ -218,13 +235,14 @@ function CancelSaveForm({
         disabled={disabled || pending}
         type="submit"
       >
-        {pending ? "Returning…" : "Return without saving"}
+        {pending ? t("Returning…") : t("Return without saving")}
       </button>
     </form>
   );
 }
 
 export function SignOutForm() {
+  const { t } = useI18n();
   const [state, action, pending] = useActionState(signOut, {});
   const feedback = useRef<HTMLParagraphElement>(null);
   useEffect(() => {
@@ -239,7 +257,7 @@ export function SignOutForm() {
           className="account-message account-error"
           role="alert"
         >
-          {state.error}
+          {t(state.error)}
         </p>
       )}
       <button
@@ -247,10 +265,10 @@ export function SignOutForm() {
         type="submit"
         disabled={pending}
       >
-        {pending ? "Signing out…" : "Sign out"}
+        {pending ? t("Signing out…") : t("Sign out")}
       </button>
       <span className="sr-only" role="status">
-        {pending ? "Signing out…" : ""}
+        {pending ? t("Signing out…") : ""}
       </span>
     </form>
   );

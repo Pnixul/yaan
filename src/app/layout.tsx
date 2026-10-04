@@ -4,6 +4,7 @@ import "./globals.css";
 import "./shell.css";
 import { AppNavigation } from "@/components/app-navigation";
 import { THEME_BOOTSTRAP } from "@/lib/theme";
+import { LANGUAGE_BOOTSTRAP } from "@/lib/language";
 
 export const metadata: Metadata = {
   title: "YAAN — Get to know the neighbourhood",
@@ -15,9 +16,16 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="th" suppressHydrationWarning>
       <head>
-        <script id="yaan-theme" dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
+        <script
+          id="yaan-theme"
+          dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }}
+        />
+        <script
+          id="yaan-language"
+          dangerouslySetInnerHTML={{ __html: LANGUAGE_BOOTSTRAP }}
+        />
       </head>
       <body className="font-sans antialiased">
         <AppNavigation />

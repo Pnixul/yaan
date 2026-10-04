@@ -1,7 +1,8 @@
+import { Message } from "@/components/i18n";
 export default function LoadingAccount() {
   return (
     <p className="account-message" role="status">
-      Checking your account…
+      <Message text={"Checking your account…"} />{" "}
     </p>
   );
 }

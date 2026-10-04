@@ -44,6 +44,8 @@ The implemented entry points are Home (`/`) and the established Explore workspac
 
 Primary navigation contains Home, Explore, Saved, and Account. Saved Places is an authenticated account feature. Signed-out users can visit Saved to understand its value and sign in. Account supports email/password sign up, sign in, authenticated email identity, and sign out. About YAAN, Data & Sources, and supporting Privacy / Feedback content remain planned.
 
+The interface defaults to Thai and offers English through a compact shared language control. Language and explicit Light/Dark preferences persist locally without changing account state or Explore URLs. Location, history and route content remains illustrative sample data in either language; these are not verified real-world conditions or navigation guidance.
+
 Guest exploration is a product principle: Home, search, reference selection, nearby places, routes, and area context remain accessible without authentication. Authentication applies only to account-dependent functionality. Saving requires an account. A signed-out Save action carries the place and current Explore context through authentication, completes the save, and returns the user without requiring another Save click. Legacy browser-local saves are discarded, never imported.
 
 ### Location First

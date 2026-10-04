@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/components/i18n";
+
 import Link from "next/link";
 import {
   ArrowRight,
@@ -14,6 +16,7 @@ import { MOCK_PLACES, categoryLabel } from "@/lib/mock-places";
 import { useSavedPlaces } from "@/lib/saved-places";
 
 export function SavedPlaces() {
+  const { t } = useI18n();
   const { ids, ready, mode, pending, error, remove, reload } = useSavedPlaces();
   const [announcement, setAnnouncement] = useState("");
   const list = useRef<HTMLUListElement>(null);
@@ -26,46 +29,46 @@ export function SavedPlaces() {
     <main id="main-content" tabIndex={-1} className="saved-page">
       <header className="saved-heading">
         <p className="eyebrow">
-          Your places
-          {mode === "account" ? " · Your account" : ""}
+          {t("Your places")} {mode === "account" ? t("· Your account") : ""}
         </p>
-        <h1>Saved places</h1>
-        <p>A few places to come back to.</p>
+        <h1>{t("Saved places")}</h1>
+        <p>{t("A few places to come back to.")}</p>
       </header>
       <p className="saved-storage-note" role="status">
         {error && !ready
-          ? "Saved places are unavailable."
+          ? t("Saved places are unavailable.")
           : !ready
-            ? "Loading saved places…"
+            ? t("Loading saved places…")
             : mode === "account"
-              ? "Saved to your account. Available whenever you sign in."
-              : "Sign in to access your saved places."}
+              ? t("Saved to your account. Available whenever you sign in.")
+              : t("Sign in to access your saved places.")}
       </p>
       {mode === "signed-out" && (
         <section className="saved-empty" aria-labelledby="saved-signin-title">
           <Bookmark size={28} strokeWidth={1.5} aria-hidden="true" />
-          <h2 id="saved-signin-title">Keep your places together.</h2>
+          <h2 id="saved-signin-title">{t("Keep your places together.")}</h2>
           <p>
-            Sign in or create an account to save places and find them again on
-            any device.
+            {t(
+              "Sign in or create an account to save places and find them again on any device.",
+            )}{" "}
           </p>
           <Link className="primary-button" href="/account?next=/saved">
-            Sign in or create account <ArrowRight size={18} />
+            {t("Sign in or create account")} <ArrowRight size={18} />
           </Link>
           <Link className="home-explore-link" href="/explore">
-            Continue exploring <ArrowRight size={18} />
+            {t("Continue exploring")} <ArrowRight size={18} />
           </Link>
         </section>
       )}
       {error && (
         <div className="saved-storage-note" role="alert">
-          <p>{error}</p>
+          <p>{t(error)}</p>
           <button
             type="button"
             className="text-button"
             onClick={() => void reload()}
           >
-            Try again
+            {t("Try again")}{" "}
           </button>
         </div>
       )}
@@ -75,11 +78,15 @@ export function SavedPlaces() {
           <>
             <div className="saved-list-heading">
               <h2>
-                {places.length} {places.length === 1 ? "place" : "places"}
+                {places.length} {places.length === 1 ? t("place") : t("places")}
               </h2>
-              <span>Sample locations</span>
+              <span>{t("Sample locations")}</span>
             </div>
-            <ul className="saved-list" ref={list} aria-label="Saved places">
+            <ul
+              className="saved-list"
+              ref={list}
+              aria-label={t("Saved places")}
+            >
               {places.map((place, index) => {
                 const Icon = categoryIcons[place.category];
                 const area = MOCK_AREAS.find(
@@ -97,7 +104,7 @@ export function SavedPlaces() {
                       <span className="saved-place-name">
                         <strong>{place.name}</strong>
                         <small>
-                          {categoryLabel(place.category)} · {area?.name}
+                          {t(categoryLabel(place.category))} · {area?.name}
                         </small>
                       </span>
                       <ArrowUpRight size={19} aria-hidden="true" />
@@ -106,12 +113,14 @@ export function SavedPlaces() {
                       type="button"
                       className="saved-remove"
                       disabled={pending}
-                      aria-label={`Unsave ${place.name}`}
+                      aria-label={t("Unsave {name}", { name: place.name })}
                       onClick={async () => {
                         setAnnouncement("");
                         if (!(await remove(place.id))) return;
                         setAnnouncement(
-                          `${place.name} removed from Saved Places.`,
+                          t("{name} removed from Saved Places.", {
+                            name: place.name,
+                          }),
                         );
                         requestAnimationFrame(() => {
                           const buttons =
@@ -127,33 +136,34 @@ export function SavedPlaces() {
                       }}
                     >
                       <BookmarkMinus size={18} aria-hidden="true" />
-                      <span>Unsave</span>
+                      <span>{t("Unsave")}</span>
                     </button>
                   </li>
                 );
               })}
             </ul>
             <Link className="home-explore-link" href="/explore">
-              Keep exploring <ArrowRight size={18} />
+              {t("Keep exploring")} <ArrowRight size={18} />
             </Link>
           </>
         ) : (
           <section className="saved-empty" aria-labelledby="saved-empty-title">
             <Bookmark size={28} strokeWidth={1.5} aria-hidden="true" />
             <h2 id="saved-empty-title" ref={emptyHeading} tabIndex={-1}>
-              Keep a place in mind.
+              {t("Keep a place in mind.")}{" "}
             </h2>
             <p>
-              Save a place from its details in Explore. It will appear here when
-              you want another look.
+              {t(
+                "Save a place from its details in Explore. It will appear here when you want another look.",
+              )}{" "}
             </p>
             <Link className="home-explore-link" href="/explore">
-              Explore a location <ArrowRight size={18} />
+              {t("Explore a location")} <ArrowRight size={18} />
             </Link>
           </section>
         ))}
       <span className="sr-only" role="status">
-        {pending ? "Updating saved places…" : announcement}
+        {pending ? t("Updating saved places…") : announcement}
       </span>
     </main>
   );

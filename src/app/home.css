@@ -4,7 +4,39 @@
   margin: 0 auto;
 }
 .home-intro {
+  position: relative;
+  isolation: isolate;
   padding-top: 40px;
+}
+.home-atmosphere {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  inset: 0 -22px auto;
+  height: 390px;
+  opacity: 0.45;
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 18%,
+    black 65%,
+    transparent
+  );
+}
+.theme-illustration {
+  object-fit: cover;
+}
+.home-atmosphere img {
+  object-position: 68% center;
+}
+.home-atmosphere::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--background) 12%, transparent 100%);
+}
+.home-hero {
+  min-width: 0;
 }
 .home-hero > .eyebrow {
   display: flex;
@@ -262,12 +294,36 @@
 }
 @media (min-width: 1000px) {
   .home-intro {
-    display: grid;
-    grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
-    gap: 75px;
-    align-items: center;
-    padding-top: 70px;
-    padding-bottom: 64px;
+    padding-top: 64px;
+    padding-bottom: 40px;
+  }
+  .home-atmosphere {
+    inset: 0 -36px auto;
+    height: 580px;
+    opacity: 1;
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      black 8%,
+      black 72%,
+      transparent
+    );
+  }
+  .home-atmosphere img {
+    object-position: center;
+  }
+  .home-atmosphere::after {
+    background: linear-gradient(
+      90deg,
+      var(--background) 4%,
+      color-mix(in srgb, var(--background) 95%, transparent) 30%,
+      transparent 80%,
+      var(--background) 100%
+    );
+  }
+  .home-hero {
+    max-width: 580px;
+    min-height: 450px;
   }
   .home-hero h1 {
     font-size: clamp(52px, 4.7vw, 66px);
@@ -278,7 +334,29 @@
     font-size: 15px;
   }
   .home-examples {
-    margin-top: 0;
+    margin-top: 24px;
+    padding: 24px 0 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+  }
+  .home-examples h2 {
+    margin-top: 8px;
+  }
+  .example-locations {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+    margin-top: 16px;
+  }
+  .example-location {
+    border-top: 0;
+    padding: 10px 0;
+  }
+  .home-examples .examples-note {
+    border-top: 0;
+    padding-top: 4px;
   }
   .home-context {
     display: grid;
@@ -298,4 +376,23 @@
     justify-self: start;
     margin-top: 12px;
   }
+}
+
+.home-hero > .eyebrow,
+.examples-heading .eyebrow {
+  font-size: 11px;
+}
+.home-lede {
+  font-size: 15px;
+}
+.home-context-list p,
+.example-location small,
+.home-footer,
+.home-search > p,
+.home-examples > p,
+.home-examples .examples-note {
+  font-size: 13px;
+}
+.home-context {
+  padding-block: 40px;
 }

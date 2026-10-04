@@ -49,6 +49,10 @@ YAAN should avoid looking like:
 
 Home and shared navigation extend the established YAAN palette, typography, and calm editorial composition. Home leads with a short value proposition and search, followed by useful example area links and a brief explanation. Use spacing, restrained surfaces, and Lucide icons for character; avoid decorative feature grids, invented metrics, testimonials, and heavy effects.
 
+The committed Light/Dark Home illustrations form a masked atmospheric layer behind the introduction, faded toward the text and page edges. Desktop example areas form a compact row below the hero; mobile crops and softens the artwork. Signed-out Account uses a form-first desktop split with the matching Auth illustration and short HTML copy. Below 1000px the decorative Auth panel is omitted. Signed-in Account retains a focused single-column layout with Explore primary, Saved secondary and Sign out as a utility.
+
+Thai headings avoid negative tracking and use comfortable line height. Both languages share semantic colors, control sizing and hierarchy. Nearby and route details use dividers and spacing rather than nested cards. Selected markers retain a strong pin and label; passive places use neutral borders and hover/focus labels. Provider basemap labels remain outside application collision and language control.
+
 Start with a stacked layout at small widths. Progressively enhance Home into a wider introduction and example-area composition on desktop. Mobile primary navigation uses labelled icon links along the bottom; desktop uses header links. Reserve navigation space in both scrolling pages and the fixed-height Explore workspace, including safe-area insets. Keep clear focus styles and comfortable touch targets.
 
 Design the core experience for mobile first.

@@ -32,37 +32,45 @@ body {
   display: flex;
   align-items: center;
   flex-shrink: 0;
-  gap: 7px;
-  color: var(--muted-foreground);
-  font-size: 12px;
+  justify-content: center;
+  width: 44px;
 }
-.theme-control select {
+.appearance-controls {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+.appearance-controls button {
   min-height: 44px;
-  max-width: 94px;
-  padding: 0 6px;
-  border: 1px solid var(--input);
-  border-radius: 8px;
+  border-radius: var(--radius);
   color: var(--secondary-foreground);
+  border: 1px solid var(--border);
   background: var(--surface);
-  cursor: pointer;
 }
-.theme-control select:hover {
-  background: var(--secondary);
+.appearance-controls button:hover {
+  background: var(--secondary-hover);
+}
+.language-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+@media (max-width: 1099px) {
+  .site-prototype {
+    display: none;
+  }
 }
 @media (max-width: 400px) {
   .site-header {
     padding-inline: 12px;
     gap: 8px;
   }
-  .theme-control {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0;
-    font-size: 10px;
-  }
-  .theme-control select {
-    min-height: 44px;
-    font-size: 12px;
+}
+@media (min-width: 768px) {
+  .appearance-controls {
+    margin-left: 0;
   }
 }
 /* Override component hover states for unavailable actions without fading text. */
@@ -73,7 +81,12 @@ body {
   box-shadow: none;
   opacity: 1;
 }
-:where(.secondary-button, .save-place-button, .text-button, .account-retry):active:not(:disabled) {
+:where(
+    .secondary-button,
+    .save-place-button,
+    .text-button,
+    .account-retry
+  ):active:not(:disabled) {
   background: var(--secondary-hover);
 }
 .primary-nav {

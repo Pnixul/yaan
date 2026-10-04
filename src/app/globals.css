@@ -28,7 +28,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-
 @layer base {
   button,
   a,
@@ -1356,7 +1355,6 @@
   }
 }
 
-
 /* Core exploration extends the existing panel and map surfaces. */
 .place-detail-toolbar {
   display: flex;
@@ -1926,5 +1924,291 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Final workspace rhythm: one scroll surface, with reachable context and actions. */
+.panel-scroll {
+  min-height: 0;
+  scrollbar-gutter: stable;
+  scroll-padding-block: 64px;
+}
+.mobile-route-preview {
+  display: none;
+}
+.exploration-panel .panel-topline {
+  margin-bottom: 16px;
+}
+.context-switch {
+  position: sticky;
+  top: -1px;
+  z-index: 5;
+  background: var(--surface);
+  padding-top: 4px;
+}
+.context-switch button {
+  font-size: 14px;
+  min-height: 48px;
+}
+.reference-strip button {
+  min-height: 44px;
+}
+.nearby-detail,
+.nearby-overview,
+.condition-heading {
+  padding-top: 24px;
+}
+.place-detail-toolbar {
+  align-items: center;
+  flex-wrap: wrap;
+  padding-bottom: 16px;
+  gap: 8px;
+}
+.place-detail-toolbar > .text-button {
+  flex-shrink: 1;
+}
+.save-place-control {
+  margin-left: auto;
+}
+.save-place-button {
+  padding-block: 8px;
+  line-height: 1.5;
+}
+.place-detail-category {
+  flex-wrap: wrap;
+}
+.nearby-intro,
+.place-description,
+.detail-intro,
+.risk-explanation {
+  font-size: 14px;
+}
+.nearby-footnote,
+.journey-disclaimer,
+.context-note,
+.save-storage-note {
+  font-size: 12px;
+  line-height: 1.8;
+}
+.journey-endpoints {
+  margin-block: 16px;
+  padding-block: 16px;
+}
+.journey-endpoints > span {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.journey-endpoints small,
+.journey-stats span {
+  font-size: 12px;
+}
+.journey-stats {
+  margin-block: 20px;
+}
+.route-active {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.route-active button {
+  width: auto;
+  min-height: 44px;
+  font-size: 13px;
+}
+.route-active > span {
+  padding-top: 0;
+}
+.reference-action {
+  padding: 12px;
+  line-height: 1.6;
+}
+.nearby-detail h2,
+.location-heading h1 {
+  overflow-wrap: anywhere;
+}
+.exploration-panel:has(.nearby-detail) .location-heading h1 {
+  font-size: 20px;
+}
+.exploration-panel:has(.nearby-detail) .location-district,
+.exploration-panel:has(.nearby-detail) .area-subtitle {
+  display: none;
+}
+.exploration-panel:has(.nearby-detail) .reference-strip {
+  margin-top: 8px;
+}
+.poi-marker {
+  width: 44px;
+  height: 44px;
+}
+.poi-marker-pin {
+  color: var(--secondary-foreground);
+  border-color: var(--input);
+}
+.poi-marker.is-selected {
+  z-index: 5;
+}
+.poi-marker:hover,
+.poi-marker:focus-visible {
+  z-index: 6;
+}
+.poi-marker.is-selected .poi-marker-label {
+  color: var(--foreground);
+  font-weight: 600;
+}
+.poi-marker:focus-visible {
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}
+.map-legend {
+  max-width: calc(100% - 100px);
+  flex-wrap: wrap;
+  padding-block: 8px;
+}
+.map-legend button {
+  min-height: 44px;
+}
+.category-controls button {
+  min-height: 44px;
+}
+.month-column > span {
+  font-size: 10px;
+  white-space: nowrap;
+}
+html:lang(th) body {
+  font-family: Arial, "Leelawadee UI", Tahoma, sans-serif;
+}
+html:lang(th) :is(h1, h2, h3, .eyebrow) {
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+html:lang(th) .home-hero h1 {
+  font-size: clamp(36px, 4.6vw, 60px);
+  line-height: 1.4;
+}
+html:lang(th) .home-hero > .eyebrow {
+  letter-spacing: 0;
+}
+@media (max-width: 767px) {
+  .yaan-app .explore-layout {
+    --sheet-height: 44%;
+  }
+  .exploration-panel:not(.is-expanded) .mobile-route-preview {
+    display: grid;
+    gap: 8px;
+    padding: 0 20px 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .mobile-route-preview h2 {
+    font-size: 22px;
+  }
+  .mobile-route-preview p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+    overflow-wrap: anywhere;
+  }
+  .mobile-route-preview strong {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .mobile-route-preview button {
+    justify-self: start;
+    min-height: 44px;
+  }
+  .exploration-panel:not(.is-expanded):has(.mobile-route-preview)
+    .panel-scroll {
+    display: none;
+  }
+  .exploration-panel.is-expanded {
+    height: calc(100% - 132px);
+  }
+  .sheet-handle {
+    height: 44px;
+    min-height: 44px;
+    gap: 10px;
+  }
+  .sheet-handle > .sheet-grip {
+    width: 28px;
+  }
+  .sheet-handle > .sheet-label {
+    width: auto;
+    height: auto;
+    background: none;
+    font-size: 12px;
+  }
+  .panel-scroll {
+    padding-inline: 20px;
+    height: auto;
+    flex: 1;
+  }
+  .context-switch {
+    margin-top: 8px;
+  }
+  .exploration-panel .panel-topline .eyebrow,
+  .exploration-panel .panel-topline .sample-tag {
+    font-size: 11px;
+  }
+  .exploration-panel:has(.nearby-detail) .panel-topline {
+    display: none;
+  }
+  .nearby-detail {
+    padding-top: 12px;
+  }
+  .map-controls {
+    top: auto;
+    bottom: 50px;
+    right: 12px;
+    gap: 6px;
+    flex-direction: row;
+  }
+  .zoom-controls {
+    display: flex;
+  }
+  .zoom-controls button:first-child {
+    border-bottom: 0;
+    border-right: 1px solid var(--border);
+    border-radius: 9px 0 0 9px;
+  }
+  .zoom-controls button:last-child {
+    border-radius: 0 9px 9px 0;
+  }
+  .map-legend {
+    display: none;
+  }
+  .category-controls button {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .search-field input {
+    font-size: 16px;
+  }
+  .search-results {
+    max-height: min(320px, 46dvh);
+  }
+  .exploration-map-top {
+    top: 12px;
+  }
+  .map-section .maplibregl-ctrl-bottom-right {
+    bottom: 24px;
+  }
+}
+@media (max-width: 767px) and (max-height: 540px) {
+  .yaan-app .explore-layout {
+    --sheet-height: 42%;
+  }
+  .exploration-panel.is-expanded {
+    height: calc(100% - 72px);
+  }
+  .category-controls {
+    max-width: calc(100% - 52px);
+  }
+  .map-controls .zoom-controls {
+    display: none;
+  }
+  .map-controls {
+    bottom: 32px;
   }
 }

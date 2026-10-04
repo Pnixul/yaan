@@ -109,8 +109,29 @@
   background: var(--destructive-soft);
 }
 .saved-empty {
-  padding: 28px 0 20px;
+  padding: 36px 0 28px;
   border-top: 1px solid var(--border);
+}
+.saved-empty .primary-button {
+  max-width: 400px;
+  margin-top: 24px;
+}
+.saved-empty .home-explore-link {
+  display: flex;
+  width: fit-content;
+}
+.saved-storage-note {
+  font-size: 14px;
+}
+.saved-list {
+  margin-top: 16px;
+}
+.saved-list li:focus-within {
+  background: var(--secondary);
+}
+.saved-place-link:focus-visible,
+.saved-remove:focus-visible {
+  outline-offset: -3px;
 }
 .saved-empty > svg {
   color: var(--muted-foreground);

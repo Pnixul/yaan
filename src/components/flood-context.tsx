@@ -1,4 +1,7 @@
 "use client";
+
+import { useI18n } from "@/components/i18n";
+
 import {
   ArrowLeft,
   ArrowRight,
@@ -30,11 +33,12 @@ export function FloodContext({
   onDetails,
   onReport,
 }: Props) {
+  const { t, language } = useI18n();
   const counts = monthCounts(location.reports);
   const commonMonths = counts
     .map((count, index) => ({ count, index }))
     .filter(({ count }) => count > 1)
-    .map(({ index }) => MONTHS[index])
+    .map(({ index }) => t(MONTHS[index]))
     .join(" & ");
   const heading = useRef<HTMLHeadingElement>(null);
   const overviewButton = useRef<HTMLButtonElement>(null);
@@ -55,23 +59,24 @@ export function FloodContext({
             className="text-button back-button"
             onClick={() => showDetails(false)}
           >
-            <ArrowLeft size={16} /> Flood overview
+            <ArrowLeft size={16} /> {t("Flood overview")}{" "}
           </button>
           <h2 ref={heading} tabIndex={-1}>
-            Behind the summary
+            {t("Behind the summary")}{" "}
           </h2>
           <p className="detail-intro">
-            A closer look at the fictional reports shown on the map.
+            {t("A closer look at the fictional reports shown on the map.")}{" "}
           </p>
           <div className="detail-disclaimer">
             <Info size={18} />
             <p>
-              Every report below is invented. The risk category is a sample
-              label, not a calculated assessment.
+              {t(
+                "Every report below is invented. The risk category is a sample label, not a calculated assessment.",
+              )}{" "}
             </p>
           </div>
           <h3 className="section-label">
-            Sample reports <span>{location.reports.length}</span>
+            {t("Sample reports")} <span>{location.reports.length}</span>
           </h3>
           {location.reports.length ? (
             <ul className="report-list">
@@ -90,7 +95,8 @@ export function FloodContext({
                     <span>
                       <strong>{report.street}</strong>
                       <small>
-                        {formatReportDate(report.date)} · Mock report
+                        {formatReportDate(report.date, language)} ·{" "}
+                        {t("Mock report")}
                       </small>
                     </span>
                     <MoveUpRight size={16} aria-hidden="true" />
@@ -100,16 +106,17 @@ export function FloodContext({
             </ul>
           ) : (
             <p className="empty-reports">
-              No reports in this sample. This is an absence of information, not
-              evidence of low risk.
+              {t(
+                "No reports in this sample. This is an absence of information, not evidence of low risk.",
+              )}{" "}
             </p>
           )}
           <div className="reading-note">
-            <h3>Context, not a prediction.</h3>
+            <h3>{t("Context, not a prediction.")}</h3>
             <p>
-              The shaded shape only illustrates a surrounding area. It is not a
-              flood extent or a validated analysis boundary. Historical
-              information cannot guarantee future conditions at a building.
+              {t(
+                "The shaded shape only illustrates a surrounding area. It is not a flood extent or a validated analysis boundary. Historical information cannot guarantee future conditions at a building.",
+              )}{" "}
             </p>
           </div>
         </section>
@@ -120,58 +127,65 @@ export function FloodContext({
               "risk-summary",
               !location.reports.length && "risk-unknown",
             )}
-            aria-label="Illustrative flood risk"
+            aria-label={t("Illustrative flood risk")}
           >
             <div className="risk-title">
               <span className="risk-icon">
                 <CloudRain size={22} strokeWidth={1.6} />
               </span>
               <div>
-                <p>Illustrative flood risk</p>
-                <h2>{location.category}</h2>
+                <p>{t("Illustrative flood risk")}</p>
+                <h2>{t(location.category)}</h2>
               </div>
             </div>
-            <p className="risk-explanation">{location.explanation}</p>
+            <p className="risk-explanation">{t(location.explanation)}</p>
             <span className="risk-caption">
-              Area-level example · Not a forecast
+              {t("Area-level example · Not a forecast")}{" "}
             </span>
           </section>
           <div className="supporting-indicators">
             <div>
               <span className="indicator-label">
-                <Droplets size={15} /> Historical reports
+                <Droplets size={15} /> {t("Historical reports")}{" "}
               </span>
               <strong>
                 {location.reports.length.toString().padStart(2, "0")}
-                <small> mock reports</small>
+                <small> {t("mock reports")}</small>
               </strong>
-              <p>In the illustrated area</p>
+              <p>{t("In the illustrated area")}</p>
             </div>
             <div>
               <span className="indicator-label">
-                <CloudRain size={15} /> Common months
+                <CloudRain size={15} /> {t("Common months")}{" "}
               </span>
               <strong className="month-value">
-                {commonMonths || "Not available"}
+                {commonMonths || t("Not available")}
               </strong>
               <p>
-                {commonMonths ? "In this sample history" : "No sample history"}
+                {commonMonths
+                  ? t("In this sample history")
+                  : t("No sample history")}
               </p>
             </div>
           </div>
           <section
             className="seasonality"
-            aria-label="Monthly distribution of fictional reports"
+            aria-label={t("Monthly distribution of fictional reports")}
           >
             <div className="section-heading">
-              <h2>A little seasonal context</h2>
-              <span>2022–2024 · Sample</span>
+              <h2>{t("A little seasonal context")}</h2>
+              <span>{t("2022–2024 · Sample")}</span>
             </div>
             <div
               className="month-chart"
               role="img"
               aria-label={counts
-                .map((count, i) => `${MONTHS[i]}: ${count} mock reports`)
+                .map((count, i) =>
+                  t("{month}: {count} sample reports", {
+                    month: t(MONTHS[i]),
+                    count,
+                  }),
+                )
                 .join(", ")}
             >
               {counts.map((count, i) => (
@@ -188,18 +202,18 @@ export function FloodContext({
                       }}
                     />
                   </div>
-                  <span>{MONTHS[i].slice(0, 1)}</span>
+                  <span>{t(MONTHS[i])}</span>
                 </div>
               ))}
             </div>
             <p>
               {commonMonths ? (
                 <>
-                  More sample reports in{" "}
+                  {t("More sample reports in")}{" "}
                   <strong>{commonMonths.toLowerCase()}.</strong>
                 </>
               ) : (
-                "There is not enough information to show a pattern."
+                t("There is not enough information to show a pattern.")
               )}
             </p>
           </section>
@@ -208,13 +222,14 @@ export function FloodContext({
             className="primary-button"
             onClick={() => showDetails(true)}
           >
-            Explore flood history <ArrowRight size={18} />
+            {t("Explore flood history")} <ArrowRight size={18} />
           </button>
           <div className="context-note">
             <Info size={16} />
             <p>
-              Get to know the area, not predict the future. These examples are
-              not a real flood assessment.
+              {t(
+                "Get to know the area, not predict the future. These examples are not a real flood assessment.",
+              )}{" "}
             </p>
           </div>
         </>

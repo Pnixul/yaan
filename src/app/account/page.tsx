@@ -1,3 +1,5 @@
+import { Message } from "@/components/i18n";
+import { ThemeIllustration } from "@/components/theme-illustration";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { isAuthSessionMissingError } from "@supabase/supabase-js";
@@ -24,12 +26,12 @@ export default async function Account({
     <form action={cancelSave}>
       <input type="hidden" name="intent" value={intent.id} />
       <button className="account-retry text-button" type="submit">
-        Return without saving
+        <Message text={"Return without saving"} />{" "}
       </button>
     </form>
   ) : (
     <Link className="home-explore-link" href="/explore">
-      Continue exploring →
+      <Message text={"Continue exploring →"} />{" "}
     </Link>
   );
   const supabase = await createClient();
@@ -37,8 +39,11 @@ export default async function Account({
     return (
       <>
         <p className="account-message" role="status">
-          Account access is unavailable. You can still explore; saving requires
-          an account.
+          <Message
+            text={
+              "Account access is unavailable. You can still explore; saving requires an account."
+            }
+          />{" "}
         </p>
         {onward}
       </>
@@ -56,7 +61,9 @@ export default async function Account({
   } catch {
     return (
       <div className="account-message" role="alert">
-        <p>We couldn’t check your account. Please try again.</p>
+        <p>
+          <Message text={"We couldn’t check your account. Please try again."} />
+        </p>
         <a
           className="account-retry"
           href={
@@ -67,7 +74,7 @@ export default async function Account({
                 : "/account"
           }
         >
-          Try again
+          <Message text={"Try again"} />{" "}
         </a>
         {onward}
       </div>
@@ -76,13 +83,21 @@ export default async function Account({
 
   if (signedIn) {
     return (
-      <section aria-labelledby="signed-in-heading">
-        <h2 id="signed-in-heading">You’re signed in</h2>
+      <section
+        className="signed-in-account"
+        aria-labelledby="signed-in-heading"
+      >
+        <h2 id="signed-in-heading">
+          <Message text={"You’re signed in"} />
+        </h2>
         {email && <p className="account-identity">{email}</p>}
         {intent ? (
           <>
             <p className="account-message">
-              Save {place?.name} and return to where you left off.
+              <Message
+                text="Save {name} and return to where you left off."
+                values={{ name: place?.name ?? "" }}
+              />
             </p>
             <PendingSaveForm
               intentId={intent.id}
@@ -93,16 +108,19 @@ export default async function Account({
           <>
             {(params.intent || params.save === "expired") && (
               <p className="account-message" role="status">
-                The save request has expired or was cancelled. Open the place in
-                Explore to save it.
+                <Message
+                  text={
+                    "The save request has expired or was cancelled. Open the place in Explore to save it."
+                  }
+                />{" "}
               </p>
             )}
             <div className="account-onward">
               <Link className="account-button" href="/explore">
-                Continue exploring
+                <Message text={"Continue exploring"} />{" "}
               </Link>
               <Link className="secondary-button" href="/saved">
-                View Saved Places
+                <Message text={"View Saved Places"} />{" "}
               </Link>
             </div>
           </>
@@ -113,33 +131,56 @@ export default async function Account({
   }
 
   return (
-    <>
-      {intent ? (
-        <p className="account-message">
-          Sign in or create an account to save <strong>{place?.name}</strong>.
-          We’ll save it and return you to the same place in Explore.
-        </p>
-      ) : (
-        <p className="account-message">
-          Sign in to keep places in your account and find them again on any
-          device.
-        </p>
-      )}
-      {params.intent && !intent && (
-        <p className="account-message" role="status">
-          The save request has expired or was cancelled. You can still sign in,
-          then open the place in Explore.
-        </p>
-      )}
-      {params.confirmation === "error" && (
-        <p className="account-message account-error" role="alert">
-          We couldn’t confirm that link. It may have expired or already been
-          used. Try signing in if you’ve already confirmed, or sign up again to
-          request another email.
-        </p>
-      )}
-      <AuthForm intentId={intent?.id} next={next} />
-      {!intent && onward}
-    </>
+    <div className="auth-composition">
+      <div className="auth-content">
+        {intent ? (
+          <p className="account-message">
+            <Message
+              text="Sign in or create an account to save {name}. We’ll save it and return you to the same place in Explore."
+              values={{ name: place?.name ?? "" }}
+            />
+          </p>
+        ) : (
+          <p className="account-message">
+            <Message
+              text={
+                "Sign in to keep places in your account and find them again on any device."
+              }
+            />{" "}
+          </p>
+        )}
+        {params.intent && !intent && (
+          <p className="account-message" role="status">
+            <Message
+              text={
+                "The save request has expired or was cancelled. You can still sign in, then open the place in Explore."
+              }
+            />{" "}
+          </p>
+        )}
+        {params.confirmation === "error" && (
+          <p className="account-message account-error" role="alert">
+            <Message
+              text={
+                "We couldn’t confirm that link. It may have expired or already been used. Try signing in if you’ve already confirmed, or sign up again to request another email."
+              }
+            />{" "}
+          </p>
+        )}
+        <AuthForm intentId={intent?.id} next={next} />
+        {!intent && onward}
+      </div>
+      <aside className="auth-visual">
+        <ThemeIllustration kind="auth" />
+        <div className="auth-visual-copy">
+          <h2>
+            <Message text="Your next chapter starts with a place." />
+          </h2>
+          <p>
+            <Message text="Get to know the neighbourhood. Keep the places that matter to you." />
+          </p>
+        </div>
+      </aside>
+    </div>
   );
 }

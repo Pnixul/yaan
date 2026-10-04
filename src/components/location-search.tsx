@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/components/i18n";
+
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight, MapPin, Search, X } from "lucide-react";
 import { searchLocations, type SearchResult } from "@/lib/mock-places";
@@ -11,6 +13,7 @@ export function LocationSearch({
   onSelect: (location: SearchResult) => void;
   onOpen?: () => void;
 }) {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
@@ -53,7 +56,7 @@ export function LocationSearch({
         <Search size={21} aria-hidden="true" />
         <input
           ref={input}
-          aria-label="Search demo locations in Bangkok"
+          aria-label={t("Search demo locations in Bangkok")}
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={open}
@@ -62,7 +65,7 @@ export function LocationSearch({
             open && active >= 0 ? `option-${matches[active]?.id}` : undefined
           }
           autoComplete="off"
-          placeholder="Find an area or a place"
+          placeholder={t("Find an area or a place")}
           value={query}
           onFocus={() => {
             setOpen(true);
@@ -103,7 +106,7 @@ export function LocationSearch({
           <button
             type="button"
             className="search-clear"
-            aria-label="Clear search"
+            aria-label={t("Clear search")}
             onClick={() => {
               setQuery("");
               setActive(-1);
@@ -113,13 +116,17 @@ export function LocationSearch({
             <X size={18} />
           </button>
         ) : (
-          <span className="search-hint">Bangkok</span>
+          <span className="search-hint">{t("Bangkok")}</span>
         )}
       </form>
       {open && (
         <div className="search-results">
-          <p className="eyebrow">Areas & places</p>
-          <ul id="location-options" role="listbox" aria-label="Demo locations">
+          <p className="eyebrow">{t("Areas & places")}</p>
+          <ul
+            id="location-options"
+            role="listbox"
+            aria-label={t("Demo locations")}
+          >
             {matches.map((location, index) => (
               <li key={location.id} role="presentation">
                 <button
@@ -139,7 +146,7 @@ export function LocationSearch({
                       {location.name} <span lang="th">{location.thaiName}</span>
                     </strong>
                     <small>
-                      {location.typeLabel} · {location.subtitle}
+                      {t(location.typeLabel)} · {location.subtitle}
                     </small>
                   </span>
                   <ArrowUpRight size={18} aria-hidden="true" />
@@ -149,11 +156,13 @@ export function LocationSearch({
           </ul>
           {!matches.length && (
             <p className="search-empty" role="status">
-              No demo places match. Try Ari, Thong Lo, or Lat Krabang.
+              {t(
+                "No demo places match. Try Ari, Thong Lo, or Lat Krabang.",
+              )}{" "}
             </p>
           )}
           <p className="search-footnote">
-            Sample locations · Search stays on this device
+            {t("Sample locations · Search stays on this device")}{" "}
           </p>
         </div>
       )}

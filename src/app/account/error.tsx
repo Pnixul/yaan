@@ -1,11 +1,14 @@
 "use client";
 
+import { useI18n } from "@/components/i18n";
+
 export default function AccountError({ reset }: { reset: () => void }) {
+  const { t } = useI18n();
   return (
     <div className="account-message" role="alert">
-      <p>Account services are temporarily unavailable.</p>
+      <p>{t("Account services are temporarily unavailable.")}</p>
       <button className="account-button" type="button" onClick={reset}>
-        Try again
+        {t("Try again")}{" "}
       </button>
     </div>
   );

@@ -47,6 +47,11 @@ export function buildMockRoute(
   };
 }
 
-export function formatDistance(meters: number) {
-  return meters < 1000 ? `${meters} m` : `${(meters / 1000).toFixed(1)} km`;
+export function formatDistance(meters: number, language: "th" | "en" = "en") {
+  return new Intl.NumberFormat(language, {
+    style: "unit",
+    unit: meters < 1000 ? "meter" : "kilometer",
+    minimumFractionDigits: meters < 1000 ? 0 : 1,
+    maximumFractionDigits: meters < 1000 ? 0 : 1,
+  }).format(meters < 1000 ? meters : meters / 1000);
 }

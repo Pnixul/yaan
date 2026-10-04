@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/components/i18n";
+
 import { useEffect, useRef, useState } from "react";
 import {
   AttributionControl,
@@ -57,8 +59,10 @@ export default function NeighborhoodMap({
   selection,
   onReport,
 }: Props) {
+  const { t, language } = useI18n();
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<Map | null>(null);
+  const loadedMap = useRef<Map | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
     "loading",
   );
@@ -106,13 +110,8 @@ export default function NeighborhoodMap({
         attributeFilter: ["data-theme"],
       });
       map.addControl(new AttributionControl({ compact: true }), "bottom-right");
-      map
-        .getCanvas()
-        .setAttribute(
-          "aria-label",
-          "Bangkok map. Use arrow keys to pan and plus or minus to zoom.",
-        );
       map.on("load", () => {
+        loadedMap.current = map ?? null;
         window.clearTimeout(timeout);
         setStatus("ready");
         setReady((value) => value + 1);
@@ -134,8 +133,18 @@ export default function NeighborhoodMap({
       themeObserver?.disconnect();
       map?.remove();
       mapRef.current = null;
+      loadedMap.current = null;
     };
   }, [attempt]);
+
+  useEffect(() => {
+    mapRef.current
+      ?.getCanvas()
+      .setAttribute(
+        "aria-label",
+        t("Bangkok map. Use arrow keys to pan and plus or minus to zoom."),
+      );
+  }, [ready, attempt, t]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -189,12 +198,12 @@ export default function NeighborhoodMap({
     pin.className = "place-marker-pin";
     const label = document.createElement("span");
     label.className = "place-marker-label";
-    label.textContent = "Your reference";
+    label.textContent = t("Your reference");
     selected.append(pin, label);
     selected.setAttribute("role", "img");
     selected.setAttribute(
       "aria-label",
-      `Reference location: ${reference.name}`,
+      t("Reference location: {name}", { name: reference.name }),
     );
     const marker = new Marker({
       element: selected,
@@ -206,7 +215,7 @@ export default function NeighborhoodMap({
     return () => {
       marker.remove();
     };
-  }, [ready, reference]);
+  }, [ready, reference, t]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -220,9 +229,12 @@ export default function NeighborhoodMap({
         element.dataset.reportId = report.id;
         element.setAttribute(
           "aria-label",
-          `View mock report: ${report.street}, ${formatReportDate(report.date)}`,
+          t("View sample report: {street}, {date}", {
+            street: report.street,
+            date: formatReportDate(report.date, language),
+          }),
         );
-        element.title = `Mock report · ${report.street}`;
+        element.title = `${t("Mock report")} · ${report.street}`;
         element.addEventListener("click", () => onReport(report));
         const dot = document.createElement("span");
         element.append(dot);
@@ -232,7 +244,7 @@ export default function NeighborhoodMap({
       }
     }
     return () => markers.forEach((marker) => marker.remove());
-  }, [ready, location, showReports, onReport]);
+  }, [ready, location, showReports, onReport, t, language]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -242,7 +254,10 @@ export default function NeighborhoodMap({
       element.className = "poi-marker";
       element.type = "button";
       element.dataset.placeId = place.id;
-      element.setAttribute("aria-label", `Explore ${place.name}`);
+      element.setAttribute(
+        "aria-label",
+        t("Explore {name}", { name: place.name }),
+      );
       element.title = place.name;
       const pin = document.createElement("span");
       pin.className = "poi-marker-pin";
@@ -255,7 +270,7 @@ export default function NeighborhoodMap({
       return new Marker({ element }).setLngLat(place.coordinates).addTo(map);
     });
     return () => markers.forEach((marker) => marker.remove());
-  }, [ready, places, onPlace]);
+  }, [ready, places, onPlace, t]);
 
   useEffect(() => {
     mapRef.current
@@ -266,7 +281,7 @@ export default function NeighborhoodMap({
         marker.classList.toggle("is-selected", selected);
         marker.setAttribute("aria-pressed", String(selected));
       });
-  }, [ready, places, selectedPlace]);
+  }, [ready, places, selectedPlace, t]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -313,10 +328,16 @@ export default function NeighborhoodMap({
         marker.classList.toggle("is-selected", selected);
         marker.setAttribute("aria-pressed", String(selected));
       });
-  }, [ready, location, showReports, selectedReport]);
+  }, [ready, location, showReports, selectedReport, t, language]);
 
   useEffect(() => {
-    if (!ready) return;
+    const map = mapRef.current;
+    // A new map can briefly coexist with the previous ready counter during
+    // retry or Fast Refresh. Fit only a loaded map with a usable viewport.
+    if (!ready || !map || loadedMap.current !== map) return;
+    const width = container.current?.clientWidth ?? 0;
+    const height = container.current?.clientHeight ?? 0;
+    if (width < 1 || height < 1) return;
     const points =
       route?.coordinates ??
       (conditions
@@ -332,14 +353,13 @@ export default function NeighborhoodMap({
       ? 0
       : 550;
     if (points.length > 1) {
-      const height = container.current?.clientHeight ?? 500;
       const small = height < 500;
-      mapRef.current?.fitBounds(bounds, {
+      map.fitBounds(bounds, {
         padding: {
           top: small ? Math.min(reference ? 160 : 115, height * 0.43) : 190,
           bottom: small ? Math.min(140, height * 0.34) : 125,
-          left: 55,
-          right: 75,
+          left: Math.min(55, width * 0.15),
+          right: Math.min(75, width * 0.2),
         },
         maxZoom: 16,
         duration,
@@ -371,12 +391,14 @@ export default function NeighborhoodMap({
           {status === "loading" ? (
             <>
               <MapPin size={22} />
-              <span>Getting the neighbourhood ready…</span>
+              <span>{t("Getting the neighbourhood ready…")}</span>
             </>
           ) : (
             <>
               <span>
-                Map unavailable. You can still explore the sample overview.
+                {t(
+                  "Map unavailable. You can still explore the sample overview.",
+                )}{" "}
               </span>
               <button
                 onClick={() => {
@@ -384,29 +406,29 @@ export default function NeighborhoodMap({
                   setAttempt((value) => value + 1);
                 }}
               >
-                <RotateCcw size={15} /> Retry map
+                <RotateCcw size={15} /> {t("Retry map")}{" "}
               </button>
             </>
           )}
         </div>
       )}
-      <div className="map-controls" role="group" aria-label="Map controls">
-        <span className="north-indicator" title="North">
+      <div className="map-controls" role="group" aria-label={t("Map controls")}>
+        <span className="north-indicator" title={t("North")}>
           <span>N</span>
           <Compass size={24} strokeWidth={1.3} />
         </span>
         <div className="zoom-controls">
           <button
-            aria-label="Zoom in"
-            title="Zoom in"
+            aria-label={t("Zoom in")}
+            title={t("Zoom in")}
             disabled={status !== "ready"}
             onClick={() => mapRef.current?.zoomIn({ duration: 0 })}
           >
             <Plus size={20} />
           </button>
           <button
-            aria-label="Zoom out"
-            title="Zoom out"
+            aria-label={t("Zoom out")}
+            title={t("Zoom out")}
             disabled={status !== "ready"}
             onClick={() => mapRef.current?.zoomOut({ duration: 0 })}
           >
@@ -415,8 +437,12 @@ export default function NeighborhoodMap({
         </div>
         <button
           className="recenter-control"
-          aria-label={`Recenter on ${reference?.name ?? location.name}`}
-          title={`Recenter on ${reference?.name ?? location.name}`}
+          aria-label={t("Recenter on {name}", {
+            name: reference?.name ?? location.name,
+          })}
+          title={t("Recenter on {name}", {
+            name: reference?.name ?? location.name,
+          })}
           disabled={status !== "ready"}
           onClick={recenter}
         >
@@ -429,7 +455,8 @@ export default function NeighborhoodMap({
           <span>
             <strong>{selectedReport.street}</strong>
             <small>
-              {formatReportDate(selectedReport.date)} · Fictional report
+              {formatReportDate(selectedReport.date, language)} ·{" "}
+              {t("Fictional report")}
             </small>
           </span>
         </div>

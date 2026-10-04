@@ -1,4 +1,7 @@
 "use client";
+
+import { useI18n } from "@/components/i18n";
+
 import {
   ChevronDown,
   ChevronUp,
@@ -21,6 +24,7 @@ type Props = {
   onView: (view: "nearby" | "conditions") => void;
   onChangeReference: () => void;
   children: ReactNode;
+  mobileRoutePreview?: ReactNode;
 };
 export function LocationResult({
   area,
@@ -32,7 +36,9 @@ export function LocationResult({
   onView,
   onChangeReference,
   children,
+  mobileRoutePreview,
 }: Props) {
+  const { t } = useI18n();
   const scroll = useRef<HTMLDivElement>(null);
   useEffect(() => {
     scroll.current?.scrollTo({ top: 0 });
@@ -45,8 +51,8 @@ export function LocationResult({
       )}
       aria-label={
         reference
-          ? `Exploring around ${reference.name}`
-          : `Explore ${area.name}`
+          ? t("Exploring around {name}", { name: reference.name })
+          : t("Explore {name}", { name: area.name })
       }
     >
       <button
@@ -55,12 +61,20 @@ export function LocationResult({
         aria-expanded={expanded}
         aria-controls="area-summary"
         aria-label={
-          expanded ? "Collapse location details" : "Expand location details"
+          expanded
+            ? t("Collapse location details")
+            : t("Expand location details")
         }
       >
-        <span />
+        <span className="sheet-grip" aria-hidden="true" />
+        <span className="sheet-label">
+          {t(expanded ? "Show map" : "Show details")}
+        </span>
         {expanded ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
       </button>
+      {mobileRoutePreview && (
+        <div className="mobile-route-preview">{mobileRoutePreview}</div>
+      )}
       <div
         ref={scroll}
         className="panel-scroll"
@@ -69,9 +83,11 @@ export function LocationResult({
       >
         <div className="panel-topline">
           <span className="eyebrow">
-            {reference ? "Your reference location" : "Explore a neighbourhood"}
+            {reference
+              ? t("Your reference location")
+              : t("Explore a neighbourhood")}
           </span>
-          <span className="sample-tag">Mock data</span>
+          <span className="sample-tag">{t("Mock data")}</span>
         </div>
         <div
           className={cn("location-heading", reference && "reference-heading")}
@@ -79,7 +95,7 @@ export function LocationResult({
           <div>
             <p className="location-district">
               <MapPin size={13} />
-              {area.district}, Bangkok
+              {area.district}, {t("Bangkok")}
             </p>
             <h1>{reference?.name ?? area.name}</h1>
             <p className="area-subtitle">
@@ -90,40 +106,40 @@ export function LocationResult({
         {reference ? (
           <div className="reference-strip">
             <LocateFixed size={16} />
-            <span>Exploring from here</span>
-            <button onClick={onChangeReference}>Change</button>
+            <span>{t("Exploring from here")}</span>
+            <button onClick={onChangeReference}>{t("Change")}</button>
           </div>
         ) : (
           <p className="area-select-hint">
             {view === "nearby"
-              ? "Pick a place on the map or below."
-              : "Choose a starting point in Places."}
+              ? t("Pick a place on the map or below.")
+              : t("Choose a starting point in Places.")}
           </p>
         )}
         <div
           className="context-switch"
           role="group"
-          aria-label="Location context"
+          aria-label={t("Location context")}
         >
           <button
             aria-pressed={view === "nearby"}
             onClick={() => onView("nearby")}
           >
             <Compass size={16} />
-            {reference ? "Nearby" : "Places"}
+            {reference ? t("Nearby") : t("Places")}
           </button>
           <button
             aria-pressed={view === "conditions"}
             onClick={() => onView("conditions")}
           >
             <CloudRain size={16} />
-            Area context
+            {t("Area context")}{" "}
           </button>
         </div>
         {children}
         <footer className="panel-footer">
           <span className="footer-mark">ย่าน</span>
-          <span>A little context. A better sense of place.</span>
+          <span>{t("A little context. A better sense of place.")}</span>
         </footer>
       </div>
     </aside>

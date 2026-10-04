@@ -40,7 +40,9 @@ Saved offers account-owned lists with links back to Explore, or a sign-in state 
 
 ### Appearance
 
-A labelled Theme control in the shared header offers Light, Dark, and System on every route, including mobile. Default to System; follow OS changes while System is selected. Remember the explicit preference in this browser, independently of authentication. Use a native keyboard-accessible select, keep visible focus, and show the selected preference in text. Theme changes preserve the current URL, reference, selected place, route, camera, and pending actions. If browser storage is blocked, changes still apply for the current page session.
+A compact header button toggles Light ↔ Dark in one click, with a localized accessible action label and visible keyboard focus. Before an explicit choice, appearance follows the operating system. A toggle persists Light or Dark in this browser, independently of authentication; other tabs synchronize. Theme changes preserve the current URL, reference, selected place, route, camera, and pending actions. If browser storage is blocked, changes still apply for the current page session.
+
+Thai is the initial language. The adjacent EN / ไทย button switches to English or Thai without navigation. Explicit language preferences persist in this browser and synchronize across tabs; blocked storage permits session-only changes. Language switching preserves search input, map camera, selection, URL state and authentication. Proper place names retain the available fixture names. No locale-prefixed URLs are used.
 
 ---
 
@@ -86,6 +88,8 @@ Present a curated set of everyday places initially, with compact category contro
 Nearby place details show the name, category, a useful short description, approximate distance, and approximate journey times. Directions opens a route preview in the same map experience with a clear origin, destination, and return to exploration. These are not full place pages or navigation instructions.
 
 In the core exploration prototype, the existing persistent desktop panel offers Nearby and Area context views. Flood summary and history sit within Area context. Retain the mobile bottom-sheet structure and horizontal category controls without introducing a separate mobile journey.
+
+The panel has one scroll surface and sticky context tabs. Detail views keep the reference compact, group Back and Save, and return focus to the nearby heading on Back. The mobile sheet has a labelled 44px expand/collapse control. Collapsed routes show endpoints, walking time, sample-data disclosure and Clear route; expanding reveals the full detail. Map controls sit above the sheet and bottom navigation. Short viewports retain a scrollable summary and search results.
 
 ---
 
