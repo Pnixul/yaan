@@ -141,7 +141,7 @@ export default async function Account({
             />
           </p>
         ) : (
-          <p className="account-message">
+          <p className="auth-intro">
             <Message
               text={
                 "Sign in to keep places in your account and find them again on any device."
@@ -171,14 +171,19 @@ export default async function Account({
         {!intent && onward}
       </div>
       <aside className="auth-visual">
-        <ThemeIllustration kind="auth" />
         <div className="auth-visual-copy">
+          <span className="auth-wordmark" lang="en" aria-hidden="true">
+            yaan<span className="brand-period">.</span>
+          </span>
           <h2>
             <Message text="Your next chapter starts with a place." />
           </h2>
           <p>
             <Message text="Get to know the neighbourhood. Keep the places that matter to you." />
           </p>
+        </div>
+        <div className="auth-artwork" aria-hidden="true">
+          <ThemeIllustration kind="auth" />
         </div>
       </aside>
     </div>

@@ -4,7 +4,7 @@ import { LanguageControl, useI18n } from "@/components/i18n";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bookmark, Compass, Home, UserRound, Waves } from "lucide-react";
+import { Bookmark, Compass, Home, UserRound } from "lucide-react";
 import { ThemeControl } from "@/components/theme-control";
 
 const destinations = [
@@ -23,12 +23,7 @@ export function AppNavigation() {
         {t("Skip to content")}{" "}
       </a>
       <Link className="brand" href="/" aria-label={t("YAAN home")}>
-        <span className="brand-icon">
-          <Waves size={23} strokeWidth={1.8} />
-        </span>
-        <span>
-          yaan<span className="brand-period">.</span>
-        </span>
+        <span lang="en">yaan<span className="brand-period">.</span></span>
       </Link>
       <span className="brand-tagline">{t("Every place has a story.")}</span>
       <nav className="primary-nav" aria-label={t("Primary navigation")}>

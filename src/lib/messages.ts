@@ -116,7 +116,7 @@ export const thaiMessages: Record<string, string> = {
   "Show details": "ดูข้อมูล",
   Home: "หน้าแรก",
   Explore: "สำรวจ",
-  Saved: "ที่บันทึก",
+  Saved: "บันทึกไว้",
   Account: "บัญชี",
   "Skip to content": "ข้ามไปเนื้อหา",
   "YAAN home": "หน้าแรก YAAN",
@@ -132,7 +132,7 @@ export const thaiMessages: Record<string, string> = {
   "than an": "มีมากกว่า",
   "address.": "แค่ที่อยู่",
   "Get to know life around a location. Find everyday places, see how far they are, and understand the area’s history.":
-    "รู้จักชีวิตรอบสถานที่ที่สนใจ ค้นหาสถานที่ในชีวิตประจำวัน ดูระยะทาง และเข้าใจประวัติของพื้นที่",
+    "รู้จักย่านรอบสถานที่ที่คุณสนใจ ค้นหาสถานที่ที่ใช้ในทุกวัน ดูระยะทาง และประวัติของพื้นที่",
   "Where would you like to explore?": "อยากรู้จักย่านไหน?",
   "A starting point": "เริ่มต้นที่นี่",
   "Try a neighbourhood.": "ลองสำรวจสักย่าน",
@@ -140,7 +140,7 @@ export const thaiMessages: Record<string, string> = {
     "เลือกย่าน แล้วค้นหาสถานที่ที่คุณสนใจ",
   "Start with a station, home or workspace.": "เริ่มจากสถานี บ้าน หรือที่ทำงาน",
   "Look around a place along Sukhumvit.":
-    "รู้จักพื้นที่รอบสถานที่บนถนนสุขุมวิท",
+    "สำรวจรอบสถานที่บนถนนสุขุมวิท",
   "Explore everyday life around a campus.": "สำรวจชีวิตประจำวันรอบมหาวิทยาลัย",
   "Sample places and context, ready to explore.":
     "ลองสำรวจสถานที่และบริบทจากข้อมูลตัวอย่าง",
@@ -148,7 +148,7 @@ export const thaiMessages: Record<string, string> = {
   "Picture your everyday.": "เห็นภาพชีวิตในแต่ละวัน",
   "Whether it’s somewhere new or the place you already call home.":
     "ไม่ว่าจะเป็นย่านใหม่ หรือย่านที่คุณเรียกว่าบ้าน",
-  "The things you need": "สิ่งที่คุณใช้ในทุกวัน",
+  "The things you need": "สิ่งจำเป็นในแต่ละวัน",
   "Food, transport, parks and everyday essentials around your reference location.":
     "อาหาร การเดินทาง สวน และสิ่งจำเป็นรอบจุดอ้างอิงของคุณ",
   "A sense of distance": "เข้าใจระยะทาง",
@@ -162,7 +162,7 @@ export const thaiMessages: Record<string, string> = {
   "A working prototype with sample data.": "ทดลองสำรวจด้วยข้อมูลตัวอย่าง",
   "Explore freely. No sign-in needed.": "สำรวจได้เลย โดยไม่ต้องเข้าสู่ระบบ",
   "Try Ari, Thong Lo or Lat Krabang. Sample locations only.":
-    "ลองค้นหาอารีย์ ทองหล่อ หรือลาดกระบัง ใช้ข้อมูลสถานที่ตัวอย่าง",
+    "ลองพิมพ์อารีย์ ทองหล่อ หรือลาดกระบัง · ข้อมูลตัวอย่าง",
   "Search demo locations in Bangkok": "ค้นหาสถานที่ตัวอย่างในกรุงเทพฯ",
   "Find an area or a place": "ค้นหาย่านหรือสถานที่",
   "Clear search": "ล้างคำค้นหา",
@@ -217,7 +217,7 @@ export const thaiMessages: Record<string, string> = {
   "Location context": "ข้อมูลรอบสถานที่",
   Nearby: "ใกล้เคียง",
   Places: "สถานที่",
-  "Back to nearby": "กลับไปที่ใกล้เคียง",
+  "Back to nearby": "กลับไปดูสถานที่ใกล้เคียง",
   "Back to area": "กลับไปที่ย่าน",
   "Sample place": "สถานที่ตัวอย่าง",
   "Walking route": "เส้นทางเดิน",

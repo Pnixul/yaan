@@ -19,6 +19,7 @@ export function LocationSearch({
   const [active, setActive] = useState(-1);
   const input = useRef<HTMLInputElement>(null);
   const matches = searchLocations(query);
+  const showResults = open && query.trim().length > 0;
   const activeId = matches[active]?.id;
 
   useEffect(() => {
@@ -59,23 +60,25 @@ export function LocationSearch({
           aria-label={t("Search demo locations in Bangkok")}
           role="combobox"
           aria-autocomplete="list"
-          aria-expanded={open}
-          aria-controls="location-options"
+          aria-expanded={showResults}
+          aria-controls={showResults ? "location-options" : undefined}
           aria-activedescendant={
-            open && active >= 0 ? `option-${matches[active]?.id}` : undefined
+            showResults && activeId ? `option-${activeId}` : undefined
           }
           autoComplete="off"
           placeholder={t("Find an area or a place")}
           value={query}
           onFocus={() => {
             setOpen(true);
-            onOpen?.();
+            setActive(-1);
+            if (query.trim()) onOpen?.();
           }}
           onClick={() => {
             setOpen(true);
-            onOpen?.();
+            if (query.trim()) onOpen?.();
           }}
           onChange={(event) => {
+            if (!showResults && event.target.value.trim()) onOpen?.();
             setQuery(event.target.value);
             setOpen(true);
             setActive(-1);
@@ -87,10 +90,12 @@ export function LocationSearch({
             }
             if (event.key === "ArrowDown" || event.key === "ArrowUp") {
               event.preventDefault();
+              if (!query.trim()) return;
               setOpen(true);
+              if (!showResults) onOpen?.();
               setActive((index) => {
                 if (!matches.length) return -1;
-                if (index < 0)
+                if (!showResults || index < 0)
                   return event.key === "ArrowDown" ? 0 : matches.length - 1;
                 return (
                   (index +
@@ -109,6 +114,7 @@ export function LocationSearch({
             aria-label={t("Clear search")}
             onClick={() => {
               setQuery("");
+              setOpen(false);
               setActive(-1);
               input.current?.focus();
             }}
@@ -119,7 +125,7 @@ export function LocationSearch({
           <span className="search-hint">{t("Bangkok")}</span>
         )}
       </form>
-      {open && (
+      {showResults && (
         <div className="search-results">
           <p className="eyebrow">{t("Areas & places")}</p>
           <ul

@@ -4,22 +4,22 @@
   padding: 36px 22px 48px;
 }
 .saved-heading .eyebrow {
-  font-size: 10px;
+  font-size: 13px;
 }
 .saved-heading h1 {
   margin: 13px 0 12px;
   font-size: 36px;
   line-height: 1.1;
-  font-weight: 550;
+  font-weight: 700;
   letter-spacing: -1.4px;
 }
 .saved-heading > p:last-child {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--muted-foreground);
 }
 .saved-storage-note {
   margin: 23px 0 30px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted-foreground);
   line-height: 1.8;
   max-width: 470px;
@@ -35,11 +35,11 @@
   margin-bottom: 10px;
 }
 .saved-list-heading h2 {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 }
 .saved-list-heading > span {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--muted-foreground);
 }
 .saved-list li {
@@ -67,14 +67,14 @@
 }
 .saved-place-name strong {
   display: block;
-  font-size: 15px;
-  font-weight: 550;
+  font-size: 16px;
+  font-weight: 700;
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
 .saved-place-name small {
   display: block;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--muted-foreground);
   line-height: 1.8;
   margin-top: 4px;
@@ -103,25 +103,26 @@
   padding: 6px;
   border-radius: 8px;
   color: var(--destructive);
-  font-size: 10px;
+  font-size: 13px;
 }
 .saved-remove:hover {
   background: var(--destructive-soft);
 }
 .saved-empty {
-  padding: 36px 0 28px;
-  border-top: 1px solid var(--border);
+  padding: 28px 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  animation: surface-reveal 240ms ease-out;
 }
 .saved-empty .primary-button {
+  font-size: 16px;
   max-width: 400px;
   margin-top: 24px;
 }
 .saved-empty .home-explore-link {
   display: flex;
   width: fit-content;
-}
-.saved-storage-note {
-  font-size: 14px;
 }
 .saved-list {
   margin-top: 16px;
@@ -134,19 +135,23 @@
   outline-offset: -3px;
 }
 .saved-empty > svg {
-  color: var(--muted-foreground);
-  margin-bottom: 22px;
+  color: var(--primary);
+  box-sizing: content-box;
+  padding: 14px;
+  background: var(--primary-soft);
+  border-radius: 16px;
+  margin-bottom: 18px;
 }
 .saved-empty h2 {
   font-size: 26px;
-  font-weight: 500;
+  font-weight: 700;
   letter-spacing: -0.6px;
 }
 .saved-empty p {
-  max-width: 360px;
+  max-width: 460px;
   color: var(--muted-foreground);
   line-height: 1.85;
-  font-size: 14px;
+  font-size: 15px;
   margin-top: 12px;
 }
 @media (min-width: 600px) {
@@ -174,12 +179,12 @@
   }
   .saved-remove {
     flex-direction: row;
-    font-size: 12px;
+    font-size: 14px;
     padding: 10px 14px;
     gap: 8px;
     margin-left: 22px;
   }
   .saved-empty {
-    padding-top: 42px;
+    padding: 36px;
   }
 }

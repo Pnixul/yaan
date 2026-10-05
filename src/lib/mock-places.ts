@@ -587,6 +587,8 @@ export type SearchResult = {
   thaiName?: string;
 };
 export function searchLocations(query: string): SearchResult[] {
+  const normalized = query.trim().toLowerCase();
+  if (!normalized) return [];
   const areas: SearchResult[] = MOCK_AREAS.map((area) => ({
     id: area.id,
     kind: "area",
@@ -604,12 +606,11 @@ export function searchLocations(query: string): SearchResult[] {
     subtitle: `${MOCK_AREAS.find((area) => area.id === place.areaId)?.name}, Bangkok`,
     typeLabel: categoryLabel(place.category),
   }));
-  const normalized = query.trim().toLowerCase();
   return [...areas, ...places]
     .filter((result) =>
       `${result.name} ${result.thaiName ?? ""} ${result.subtitle}`
         .toLowerCase()
         .includes(normalized),
     )
-    .slice(0, 8);
+    .slice(0, 5);
 }

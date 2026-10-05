@@ -21,7 +21,7 @@ body {
 }
 .site-prototype {
   margin-left: auto;
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted-foreground);
   white-space: nowrap;
 }
@@ -55,7 +55,7 @@ body {
   align-items: center;
   gap: 6px;
   padding: 0 10px;
-  font-size: 13px;
+  font-size: 14px;
 }
 @media (max-width: 1099px) {
   .site-prototype {
@@ -109,7 +109,7 @@ body {
   min-width: 0;
   border-radius: 8px;
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: 13px;
   text-decoration: none;
   min-height: 44px;
 }
@@ -235,7 +235,7 @@ body {
     gap: 7px;
     padding: 0 13px;
     align-self: center;
-    font-size: 13px;
+    font-size: 15px;
   }
   .primary-nav a svg {
     width: 17px;
@@ -246,6 +246,34 @@ body {
   .planned-page {
     padding-top: 110px;
   }
+}
+
+/* Shared interaction rhythm, with no delay before controls become usable. */
+.site-header .brand {
+  font-size: clamp(36px, 3.4vw, 44px);
+  flex-shrink: 0;
+}
+:where(.primary-nav a, .home-explore-link, .account-button, .saved-place-link) {
+  transition: color 160ms, background-color 160ms, box-shadow 160ms, transform 160ms;
+}
+:where(.home-page, .account-page, .saved-page) :is(.primary-button, .account-button):active:not(:disabled) {
+  transform: translateY(1px);
+}
+.search-results button > span:nth-child(2) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.search-results {
+  max-height: min(440px, 55dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.search-results [aria-selected="true"] strong {
+  color: var(--primary);
+}
+@keyframes surface-reveal {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @media (min-width: 1280px) {
   .site-header {

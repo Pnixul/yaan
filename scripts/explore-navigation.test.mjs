@@ -23,7 +23,7 @@ function load(name, overrides = {}, cache = new Map()) {
 }
 
 const { exploreEntry, exploreHref } = load("./explore-entry");
-const { MOCK_PLACES } = load("./mock-places");
+const { MOCK_PLACES, searchLocations } = load("./mock-places");
 const { MOCK_AREAS } = load("./mock-locations");
 const { explorationReducer } = load("./exploration-state");
 const origin = MOCK_PLACES.find((place) => place.id === "ari-bts");
@@ -32,6 +32,18 @@ const otherArea = MOCK_PLACES.find((place) => place.areaId !== "ari");
 const read = (query = "") => exploreEntry(new URLSearchParams(query));
 const meaningful = ({ areaId, referenceId, placeId, category, view, routing }) =>
   ({ areaId, referenceId, placeId, category, view, routing });
+
+test("search waits for a query and returns a bounded set of relevant locations", () => {
+  for (const query of ["", "   ", "\t\n", "no-such-neighbourhood"]) {
+    assert.equal(searchLocations(query).length, 0);
+  }
+  assert.equal(searchLocations(" อารีย์ ")[0].id, "ari");
+  const matches = searchLocations(" ARI ");
+  assert.equal(matches.length, 5);
+  assert.ok(matches.every((item) => `${item.name} ${item.subtitle}`.toLowerCase().includes("ari")));
+  assert.ok(matches.some((item) => item.kind === "area"));
+  assert.ok(matches.some((item) => item.kind === "place"));
+});
 
 test("legacy Home and Saved URLs preserve entry semantics", () => {
   assert.equal(read().referenceId, origin.id);

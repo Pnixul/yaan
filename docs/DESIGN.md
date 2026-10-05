@@ -175,7 +175,7 @@ Avoid making the entire product feel alarming simply because it deals with risk.
 
 ## Typography
 
-The final typeface is TBD.
+Use locally hosted LINE Seed Sans TH for Thai and English, with regular body text and bold emphasis. Supporting text generally starts at 14px; Thai uses comfortable line height without Latin tracking.
 
 Typography should feel modern and approachable while remaining highly readable in Thai and English.
 
