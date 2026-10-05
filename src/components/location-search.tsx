@@ -2,15 +2,24 @@
 
 import { useI18n } from "@/components/i18n";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { ArrowUpRight, MapPin, Search, X } from "lucide-react";
-import { searchLocations, type SearchResult } from "@/lib/mock-places";
+import {
+  MAX_QUERY_LENGTH,
+  MIN_QUERY_LENGTH,
+  normalizeQuery,
+  type Location,
+} from "@/lib/location";
+import {
+  requestLocations,
+  type SearchState,
+} from "@/lib/location-search-request";
 
 export function LocationSearch({
   onSelect,
   onOpen,
 }: {
-  onSelect: (location: SearchResult) => void;
+  onSelect: (location: Location) => void;
   onOpen?: () => void;
 }) {
   const { t } = useI18n();
@@ -18,19 +27,39 @@ export function LocationSearch({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const input = useRef<HTMLInputElement>(null);
-  const matches = searchLocations(query);
+  const listId = useId();
+  const [composing, setComposing] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const [result, setResult] = useState<SearchState>({
+    query: "",
+    status: "idle",
+    locations: [],
+  });
+  const normalized = normalizeQuery(query);
+  useEffect(() => {
+    if (!open || composing) return;
+    return requestLocations(normalized, setResult);
+  }, [normalized, open, composing, attempt]);
+  const current = result.query === normalized && !composing;
+  const matches = current && result.status === "ready" ? result.locations : [];
+  const status =
+    normalized.length < MIN_QUERY_LENGTH
+      ? "idle"
+      : current
+        ? result.status
+        : "loading";
   const showResults = open && query.trim().length > 0;
-  const activeId = matches[active]?.id;
+  const activeId = matches[active] ? `${listId}-${active}` : undefined;
 
   useEffect(() => {
     if (open && activeId) {
-      document.getElementById(`option-${activeId}`)?.scrollIntoView({
+      document.getElementById(activeId)?.scrollIntoView({
         block: "nearest",
       });
     }
   }, [open, activeId]);
 
-  function select(location: SearchResult) {
+  function select(location: Location) {
     onSelect(location);
     setQuery("");
     setOpen(false);
@@ -57,15 +86,16 @@ export function LocationSearch({
         <Search size={21} aria-hidden="true" />
         <input
           ref={input}
-          aria-label={t("Search demo locations in Bangkok")}
+          aria-label={t("Search locations in Bangkok")}
           role="combobox"
           aria-autocomplete="list"
           aria-expanded={showResults}
-          aria-controls={showResults ? "location-options" : undefined}
-          aria-activedescendant={
-            showResults && activeId ? `option-${activeId}` : undefined
-          }
+          aria-controls={showResults ? listId : undefined}
+          aria-activedescendant={showResults ? activeId : undefined}
           autoComplete="off"
+          maxLength={MAX_QUERY_LENGTH}
+          onCompositionStart={() => setComposing(true)}
+          onCompositionEnd={() => setComposing(false)}
           placeholder={t("Find an area or a place")}
           value={query}
           onFocus={() => {
@@ -84,6 +114,7 @@ export function LocationSearch({
             setActive(-1);
           }}
           onKeyDown={(event) => {
+            if (event.nativeEvent.isComposing) return;
             if (event.key === "Escape") {
               setOpen(false);
               setActive(-1);
@@ -129,16 +160,17 @@ export function LocationSearch({
         <div className="search-results">
           <p className="eyebrow">{t("Areas & places")}</p>
           <ul
-            id="location-options"
+            id={listId}
             role="listbox"
-            aria-label={t("Demo locations")}
+            aria-label={t("Locations")}
+            aria-busy={status === "loading"}
           >
             {matches.map((location, index) => (
               <li key={location.id} role="presentation">
                 <button
                   type="button"
                   role="option"
-                  id={`option-${location.id}`}
+                  id={`${listId}-${index}`}
                   aria-selected={active === index}
                   tabIndex={-1}
                   onMouseDown={(event) => event.preventDefault()}
@@ -149,11 +181,13 @@ export function LocationSearch({
                   </span>
                   <span>
                     <strong>
-                      {location.name} <span lang="th">{location.thaiName}</span>
+                      {location.name}
+                      {location.englishName &&
+                        location.englishName !== location.name && (
+                          <span lang="en"> {location.englishName}</span>
+                        )}
                     </strong>
-                    <small>
-                      {t(location.typeLabel)} · {location.subtitle}
-                    </small>
+                    <small>{location.address}</small>
                   </span>
                   <ArrowUpRight size={18} aria-hidden="true" />
                 </button>
@@ -163,12 +197,33 @@ export function LocationSearch({
           {!matches.length && (
             <p className="search-empty" role="status">
               {t(
-                "No demo places match. Try Ari, Thong Lo, or Lat Krabang.",
-              )}{" "}
+                status === "idle"
+                  ? "Type at least 2 characters to search."
+                  : status === "loading"
+                    ? "Searching Bangkok…"
+                    : status === "error"
+                      ? "Search is unavailable. Please try again."
+                      : "No locations found. Try another name or address in Bangkok.",
+              )}
             </p>
           )}
+          {status === "error" && (
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => {
+                setAttempt((value) => value + 1);
+                input.current?.focus();
+              }}
+            >
+              {t("Retry search")}
+            </button>
+          )}
           <p className="search-footnote">
-            {t("Sample locations · Search stays on this device")}{" "}
+            {t("Location search by Geoapify")} ·{" "}
+            <a href="https://www.openstreetmap.org/copyright">
+              {t("© OpenStreetMap contributors")}
+            </a>
           </p>
         </div>
       )}

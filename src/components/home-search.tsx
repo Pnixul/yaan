@@ -5,6 +5,7 @@ import { useI18n } from "@/components/i18n";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { LocationSearch } from "@/components/location-search";
+import { locationHref } from "@/lib/location";
 
 export function HomeSearch() {
   const { t } = useI18n();
@@ -24,11 +25,10 @@ export function HomeSearch() {
           }
         }}
         onSelect={(location) => {
-          const params = new URLSearchParams({ [location.kind]: location.id });
-          router.push(`/explore?${params}`);
+          router.push(locationHref(location));
         }}
       />
-      <p>{t("Try Ari, Thong Lo or Lat Krabang. Sample locations only.")}</p>
+      <p>{t("Search places and addresses in Bangkok.")}</p>
     </div>
   );
 }

@@ -13,10 +13,11 @@ import {
 import { useEffect, useRef, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import type { MockArea } from "@/lib/mock-locations";
-import type { MockPlace } from "@/lib/mock-places";
+import type { Location } from "@/lib/location";
 type Props = {
-  area: MockArea;
-  reference: MockPlace | null;
+  area: MockArea | null;
+  reference: Pick<Location, "name"> | null;
+  realLocation?: Location | null;
   expanded: boolean;
   view: "nearby" | "conditions";
   contentKey: string;
@@ -29,6 +30,7 @@ type Props = {
 export function LocationResult({
   area,
   reference,
+  realLocation,
   expanded,
   view,
   contentKey,
@@ -52,7 +54,7 @@ export function LocationResult({
       aria-label={
         reference
           ? t("Exploring around {name}", { name: reference.name })
-          : t("Explore {name}", { name: area.name })
+          : t("Explore {name}", { name: area?.name ?? t("Bangkok") })
       }
     >
       <button
@@ -87,7 +89,9 @@ export function LocationResult({
               ? t("Your reference location")
               : t("Explore a neighbourhood")}
           </span>
-          <span className="sample-tag">{t("Mock data")}</span>
+          <span className="sample-tag">
+            {area ? t("Mock data") : "Geoapify"}
+          </span>
         </div>
         <div
           className={cn("location-heading", reference && "reference-heading")}
@@ -95,11 +99,23 @@ export function LocationResult({
           <div>
             <p className="location-district">
               <MapPin size={13} />
-              {area.district}, {t("Bangkok")}
+              {[
+                realLocation?.subdistrict,
+                realLocation?.district ?? area?.district,
+                t("Bangkok"),
+              ]
+                .filter(Boolean)
+                .join(", ")}
             </p>
-            <h1>{reference?.name ?? area.name}</h1>
+            <h1>{reference?.name ?? area?.name ?? t("Choose a location")}</h1>
             <p className="area-subtitle">
-              {area.name} <span lang="th">{area.thaiName}</span>
+              {realLocation ? (
+                realLocation.address
+              ) : (
+                <>
+                  {area?.name} <span lang="th">{area?.thaiName}</span>
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -109,13 +125,13 @@ export function LocationResult({
             <span>{t("Exploring from here")}</span>
             <button onClick={onChangeReference}>{t("Change")}</button>
           </div>
-        ) : (
+        ) : area ? (
           <p className="area-select-hint">
             {view === "nearby"
               ? t("Pick a place on the map or below.")
               : t("Choose a starting point in Places.")}
           </p>
-        )}
+        ) : null}
         <div
           className="context-switch"
           role="group"

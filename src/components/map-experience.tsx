@@ -11,12 +11,8 @@ import { FloodContext } from "@/components/flood-context";
 import { NearbyContext } from "@/components/nearby-context";
 import { CategoryControls } from "@/components/category-controls";
 import { MOCK_AREAS, type MockReport } from "@/lib/mock-locations";
-import {
-  MOCK_PLACES,
-  nearbyPlaces,
-  type MockPlace,
-  type SearchResult,
-} from "@/lib/mock-places";
+import { MOCK_PLACES, nearbyPlaces, type MockPlace } from "@/lib/mock-places";
+import type { Location } from "@/lib/location";
 import { buildMockRoute } from "@/lib/mock-routes";
 import { useExploreNavigation } from "@/lib/use-explore-navigation";
 const NeighborhoodMap = dynamic(() => import("@/components/neighborhood-map"), {
@@ -33,6 +29,8 @@ const NeighborhoodMap = dynamic(() => import("@/components/neighborhood-map"), {
 export function MapExperience() {
   const { t } = useI18n();
   const { state, dispatch, href } = useExploreNavigation();
+  const realMode = Boolean(state.location || state.locationError);
+  const searchContainer = useRef<HTMLDivElement>(null);
   const [previousHref, setPreviousHref] = useState(href);
   const [expanded, setExpanded] = useState(
     (Boolean(state.placeId) && !state.routing) || state.view === "conditions",
@@ -61,12 +59,14 @@ export function MapExperience() {
     MOCK_PLACES.find((item) => item.id === state.placeId) ?? null;
   const places = useMemo(
     () =>
-      reference
-        ? nearbyPlaces(area.id, reference.id, state.category)
-        : MOCK_PLACES.filter(
-            (place) => place.areaId === area.id && place.suggestedReference,
-          ),
-    [area.id, reference, state.category],
+      realMode
+        ? []
+        : reference
+          ? nearbyPlaces(area.id, reference.id, state.category)
+          : MOCK_PLACES.filter(
+              (place) => place.areaId === area.id && place.suggestedReference,
+            ),
+    [area.id, reference, state.category, realMode],
   );
   const mapPlaces = useMemo(
     () =>
@@ -99,14 +99,9 @@ export function MapExperience() {
     },
     [dispatch],
   );
-  function search(result: SearchResult) {
-    if (result.kind === "area") {
-      dispatch({ type: "area", id: result.id });
-      setExpanded(false);
-    } else {
-      const place = MOCK_PLACES.find((item) => item.id === result.id);
-      if (place) inspect(place);
-    }
+  function search(location: Location) {
+    dispatch({ type: "location", location });
+    setExpanded(false);
   }
   return (
     <main id="main-content" tabIndex={-1} className="yaan-app">
@@ -115,8 +110,9 @@ export function MapExperience() {
       </a>
       <div className="explore-layout">
         <LocationResult
-          area={area}
-          reference={reference}
+          area={realMode ? null : area}
+          reference={realMode ? state.location : reference}
+          realLocation={state.location}
           expanded={expanded}
           mobileRoutePreview={
             state.routing && route && reference && selected ? (
@@ -144,6 +140,7 @@ export function MapExperience() {
           }
           view={state.view}
           contentKey={[
+            state.location?.id,
             area.id,
             reference?.id,
             selected?.id,
@@ -157,11 +154,45 @@ export function MapExperience() {
             setExpanded(true);
           }}
           onChangeReference={() => {
+            if (realMode) {
+              setExpanded(false);
+              searchContainer.current?.querySelector("input")?.focus();
+              return;
+            }
             dispatch({ type: "area", id: area.id });
             setExpanded(false);
           }}
         >
-          {state.view === "conditions" ? (
+          {realMode ? (
+            <div className="condition-heading" role="status">
+              <h2>
+                {t(
+                  state.locationError
+                    ? "Choose a location"
+                    : state.view === "conditions"
+                      ? "Area context"
+                      : "Nearby",
+                )}
+              </h2>
+              <p>
+                {t(
+                  state.locationError
+                    ? "This location link is incomplete or invalid. Search for a location to continue."
+                    : state.view === "conditions"
+                      ? "Flood data and official area boundaries are not available yet. This does not indicate safety."
+                      : "Nearby places and journeys are not available for this location yet.",
+                )}
+              </p>
+              {state.location && (
+                <p>
+                  {t("Location search by Geoapify")} ·{" "}
+                  <a href="https://www.openstreetmap.org/copyright">
+                    {t("© OpenStreetMap contributors")}
+                  </a>
+                </p>
+              )}
+            </div>
+          ) : state.view === "conditions" ? (
             <>
               <div className="condition-heading">
                 <span className="eyebrow">{t("Area context")}</span>
@@ -214,24 +245,26 @@ export function MapExperience() {
           aria-label={t("Explore Bangkok neighbourhoods")}
         >
           <NeighborhoodMap
-            location={area}
-            reference={reference}
+            location={realMode ? null : area}
+            reference={realMode ? state.location : reference}
             places={mapPlaces}
             selectedPlace={selected}
             route={state.routing ? route : null}
-            conditions={state.view === "conditions"}
+            conditions={!realMode && state.view === "conditions"}
             selectedReport={state.report}
-            showReports={state.view === "conditions" && showReports}
+            showReports={
+              !realMode && state.view === "conditions" && showReports
+            }
             selection={state.cameraRevision}
             onReport={openReport}
             onPlace={inspect}
           />
-          <div className="map-top exploration-map-top">
+          <div className="map-top exploration-map-top" ref={searchContainer}>
             <LocationSearch
               onSelect={search}
               onOpen={() => setExpanded(false)}
             />
-            {reference && state.view === "nearby" ? (
+            {realMode ? null : reference && state.view === "nearby" ? (
               <CategoryControls
                 selected={state.category}
                 onChange={(category) => {
@@ -261,7 +294,14 @@ export function MapExperience() {
             )}
           </div>
           <div className={`map-legend${state.routing ? " is-route" : ""}`}>
-            {state.view === "conditions" ? (
+            {realMode ? (
+              <>
+                <span className="legend-reference" />
+                <span>
+                  {t(state.location ? "Your reference" : "Choose a location")}
+                </span>
+              </>
+            ) : state.view === "conditions" ? (
               <>
                 <span className="legend-area" />
                 <span>{t("Illustrative area")}</span>
@@ -314,20 +354,30 @@ export function MapExperience() {
           <div className="map-caption">
             <ArrowUpRight size={15} />
             <span>
-              {t("Places, journeys & area context · All sample data")}
+              {t(
+                realMode
+                  ? "Location search by Geoapify"
+                  : "Places, journeys & area context · All sample data",
+              )}
             </span>
           </div>
         </section>
       </div>
       <div className="sr-only" role="status">
-        {reference
-          ? t("Exploring around {name}", { name: reference.name })
-          : t("Exploring {name}. Choose a reference place.", {
-              name: area.name,
-            })}{" "}
-        {state.view === "nearby"
-          ? t("{count} sample places.", { count: places.length })
-          : t("Mock flood context.")}{" "}
+        {realMode
+          ? state.location
+            ? t("Exploring around {name}", { name: state.location.name })
+            : t("Choose a location")
+          : reference
+            ? t("Exploring around {name}", { name: reference.name })
+            : t("Exploring {name}. Choose a reference place.", {
+                name: area.name,
+              })}{" "}
+        {realMode
+          ? ""
+          : state.view === "nearby"
+            ? t("{count} sample places.", { count: places.length })
+            : t("Mock flood context.")}{" "}
         {state.routing && selected
           ? t("Route preview to {name}.", { name: selected.name })
           : ""}

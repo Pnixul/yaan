@@ -14,9 +14,17 @@ Specific datasets, formulas, thresholds, and implementation details may evolve a
 
 ## Core Data Principle
 
+### Real Location Foundation — Milestone 1
+
+Geoapify provides real Bangkok search/geocoding labels, addresses, identities, coordinates and available administrative metadata. Thai labels come only from provider fields; English is retained when supplied. The provider’s Bangkok place filter limits searches, with country/city validation on returned data. This filter is not an official YAAN boundary dataset. Coverage is Bangkok only; provider parsing and coverage configuration remain separable for later Thailand expansion.
+
+Observed response limitations: autocomplete can miss อารีย์ while forward geocoding finds it; use forward geocoding only when autocomplete is empty. Acronyms such as KMITL may rank campus facilities or bus stops rather than the university itself; the exact Chulalongkorn University match appeared below related landmarks during QA. Similar names can represent a mall and its transit stop. `district` can be an informal neighbourhood, and `county` can conflict with other fields. Preserve explicit เขต/แขวง values from suburb/quarter where supplied, without claiming official validation; omit ambiguous units. Provider points for streets/areas are representative locations, not building assessments.
+
+Real references never receive mock nearby places, journey estimates, reports or illustrative polygons. Missing context means unavailable data, not safety. Official Bangkok administrative boundaries and all flood datasets (including BMA, HII and GISTDA) are outside this milestone. No flood scores or analysis radius have been introduced.
+
 ### Prototype Places and Journeys
 
-The core exploration prototype uses local mock areas, places, categories, flood records, and route geometry. Sample place names and coordinates are illustrative, not a verified POI directory. Do not imply verified opening hours, access, services, or recommendations.
+Legacy Home example links, bare Explore and authenticated Saved fixture links still use local mock areas, places, categories, flood records, and route geometry. `mock-places.ts`, `mock-locations.ts` and `mock-routes.ts` remain solely for this demo and Saved membership; the obsolete mock search is removed. Saving real search locations is deferred. Sample place names and coordinates are illustrative, not a verified POI directory. Do not imply verified opening hours, access, services, or recommendations.
 
 Reference locations and nearby destinations are distinct roles; any sample place can become a reference. Distances and times must follow the current origin and destination and be cleared when those selections change.
 
@@ -260,7 +268,7 @@ The mobile experience should remain responsive even when the underlying dataset 
 
 Do not collect precise user location unless it is necessary for a feature and the user has intentionally chosen to provide it.
 
-A location searched or selected on the map should not automatically become persistent personal data.
+Search text is sent through YAAN’s server to Geoapify. Successful search responses have a short private browser cache; YAAN does not persist provider responses or search history server-side. Selected normalized snapshots are intentionally placed in Explore URLs (including coordinates) for refresh/share/history; they are not stored in a database. Treat URL snapshots as untrusted display state, not verified administrative or risk evidence.
 
 Personal location-related data should only be stored when required for an explicit user feature, such as saving a place.
 

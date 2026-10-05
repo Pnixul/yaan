@@ -44,7 +44,7 @@ The implemented entry points are Home (`/`) and the established Explore workspac
 
 Primary navigation contains Home, Explore, Saved, and Account. Saved Places is an authenticated account feature. Signed-out users can visit Saved to understand its value and sign in. Account supports email/password sign up, sign in, authenticated email identity, and sign out. About YAAN, Data & Sources, and supporting Privacy / Feedback content remain planned.
 
-The interface defaults to Thai and offers English through a compact shared language control. Language and explicit Light/Dark preferences persist locally without changing account state or Explore URLs. Location, history and route content remains illustrative sample data in either language; these are not verified real-world conditions or navigation guidance.
+The interface defaults to Thai and offers English through a compact shared language control. Language and explicit Light/Dark preferences persist locally without changing account state or Explore URLs. Location search now uses Geoapify for real Bangkok places and addresses. Legacy demo links retain illustrative history, nearby places and routes; these are not verified conditions or navigation guidance.
 
 Guest exploration is a product principle: Home, search, reference selection, nearby places, routes, and area context remain accessible without authentication. Authentication applies only to account-dependent functionality. Saving requires an account. A signed-out Save action carries the place and current Explore context through authentication, completes the save, and returns the user without requiring another Save click. Legacy browser-local saves are discarded, never imported.
 
@@ -111,14 +111,14 @@ Specific features and interface implementations may evolve without changing the 
 
 ## Initial Focus
 
-YAAN initially demonstrates location exploration in Bangkok through realistic mock places and client-side interactions. The product hierarchy is:
+Milestone 1 establishes real Bangkok location search and reference selection through Geoapify. Selecting a search result opens Explore at its coordinates and establishes it as the reference, including a representative point for an area result. Nearby POIs, journeys, flood datasets and official administrative boundaries are not integrated for these real references. Legacy examples and Saved fixture links retain the labelled demo. The architecture must allow later expansion to all of Thailand, without claiming nationwide coverage now. The product hierarchy is:
 
 1. selected reference location;
 2. nearby everyday context;
 3. area conditions and history;
 4. supporting map information.
 
-Search distinguishes neighbourhoods from specific places. Category filters, compact place details, and in-product route previews support exploration. Flood history remains the first fully demonstrated condition.
+Search accepts places, addresses, streets and areas. The legacy demo retains category filters, place details, route previews and illustrative flood history.
 
 Historical flood data may be used to help users understand patterns around a selected location.
 

@@ -26,7 +26,7 @@ The exact screens and interactions may evolve, but this journey should remain si
 
 Home answers what YAAN is and what the user can do through a concise introduction and prominent location search. Example neighbourhood links provide a quick alternative to typing. A short explanation of everyday places, approximate journeys, and area history follows; no long marketing journey is required.
 
-Home and Explore share the same mock search. Selecting an area opens Explore focused on that area, without a reference place. Selecting a specific place opens its details in Explore; the user then chooses “Explore around this place” to establish the reference. Explore URLs preserve the area, reference, selected place, category, and Nearby / Area context / mock route view. Refreshing or sharing a URL restores that meaningful context inside the existing panels. Unknown or repeated parameters are ignored; without any valid location, Explore uses its default sample state.
+Home and Explore share real Bangkok search. Search waits for at least two characters, debounces input, announces loading/empty/failure states and ignores stale responses. Selecting any real result opens Explore with that location as the reference; area results use a representative point, not an official boundary. Thai provider labels are preferred when available; YAAN does not invent translations. Real locations show unavailable nearby/journey and flood/boundary context rather than demo evidence. In the separately labelled legacy demo, area links open without a reference and specific-place links open inspection before “Explore around this place”. Explore URLs preserve the area, reference, selected place, category, and Nearby / Area context / mock route view. Refreshing or sharing a URL restores that meaningful context inside the existing panels. Real-location URLs contain a compact normalized snapshot and exact coordinates so refresh and shared links work without another provider lookup. Incomplete real-location links ask users to search again and never fall back to mock evidence. Legacy unknown/repeated fixture parameters remain ignored; bare Explore retains the default labelled sample state.
 
 Meaningful Explore actions add browser history entries; selecting the same destination does not. Browser Back/Forward restores previous URL contexts, including place details. “Back to nearby” (or “Back to area”) navigates explicitly to the corresponding list with its reference and category intact, so it also works after opening a shared link directly. “Explore around this place” establishes the reference and clears the selected destination and route preview. Directions and Clear route navigate between the mock route preview and place details. Sheet expansion, camera movement, search input, report visibility, and expanded flood history/report selection stay local and are not shareable state. Navigation resets expanded flood details; restored place details open in the existing detail panel.
 
@@ -42,7 +42,7 @@ Saved offers account-owned lists with links back to Explore, or a sign-in state 
 
 A compact header button toggles Light ↔ Dark in one click, with a localized accessible action label and visible keyboard focus. Before an explicit choice, appearance follows the operating system. A toggle persists Light or Dark in this browser, independently of authentication; other tabs synchronize. Theme changes preserve the current URL, reference, selected place, route, camera, and pending actions. If browser storage is blocked, changes still apply for the current page session.
 
-Thai is the initial language. The adjacent EN / ไทย button switches to English or Thai without navigation. Explicit language preferences persist in this browser and synchronize across tabs; blocked storage permits session-only changes. Language switching preserves search input, map camera, selection, URL state and authentication. Proper place names retain the available fixture names. No locale-prefixed URLs are used.
+Thai is the initial language. The adjacent EN / ไทย button switches to English or Thai without navigation. Explicit language preferences persist in this browser and synchronize across tabs; blocked storage permits session-only changes. Language switching preserves search input, map camera, selection, URL state and authentication. Proper place names retain available provider or fixture names. No locale-prefixed URLs are used.
 
 ---
 
@@ -77,7 +77,7 @@ Current location may be offered as a shortcut, but the experience must never ass
 
 Search should remain a primary method of selecting a location.
 
-Area results focus the map without silently becoming a specific reference point. Specific places can be inspected from search, a list, or a map marker, then intentionally chosen with an “Explore around this place” action.
+Real search selection intentionally establishes a reference immediately. An area result is represented by the provider’s point and is not a building-level claim. Legacy demo area links and fixture inspection keep their existing two-step reference selection.
 
 Keep the reference visible in the panel and as a distinct map marker. Selecting a nearby destination does not replace it. Changing areas clears the old reference; choosing a new reference resets nearby selections and route previews.
 

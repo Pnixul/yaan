@@ -11,7 +11,7 @@ import {
   setWorkerUrl,
   type GeoJSONSource,
 } from "maplibre-gl";
-import type { Feature, FeatureCollection, LineString, Polygon } from "geojson";
+import type { FeatureCollection, LineString, Polygon } from "geojson";
 import {
   Compass,
   LocateFixed,
@@ -23,18 +23,18 @@ import {
 import { DEMO_MAP_STYLE } from "@/lib/map-config";
 import { applyMapTheme, mapColor } from "@/lib/map-theme";
 import {
-  MOCK_AREAS,
   formatReportDate,
   type MockArea,
   type MockReport,
 } from "@/lib/mock-locations";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { MockPlace } from "@/lib/mock-places";
+import type { Location } from "@/lib/location";
 import type { MockRoute } from "@/lib/mock-routes";
 
 type Props = {
-  location: MockArea;
-  reference: MockPlace | null;
+  location: MockArea | null;
+  reference: Pick<Location, "name" | "coordinates"> | null;
   places: MockPlace[];
   selectedPlace: MockPlace | null;
   route: MockRoute | null;
@@ -68,6 +68,9 @@ export default function NeighborhoodMap({
   );
   const [ready, setReady] = useState(0);
   const [attempt, setAttempt] = useState(0);
+  const initialCenter = useRef<[number, number]>(
+    reference?.coordinates ?? location?.coordinates ?? [100.5018, 13.7563],
+  );
 
   useEffect(() => {
     if (!container.current) return;
@@ -83,7 +86,7 @@ export default function NeighborhoodMap({
       map = new Map({
         container: container.current,
         style: DEMO_MAP_STYLE,
-        center: MOCK_AREAS.find((area) => area.id === "ari")!.coordinates,
+        center: initialCenter.current,
         zoom: container.current.clientWidth < 600 ? 13.65 : 14.4,
         minZoom: 10,
         maxZoom: 18,
@@ -149,10 +152,20 @@ export default function NeighborhoodMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!ready || !map?.getStyle()?.layers) return;
-    const area: Feature<Polygon> = {
-      type: "Feature",
-      properties: {},
-      geometry: { type: "Polygon", coordinates: [location.illustration] },
+    const area: FeatureCollection<Polygon> = {
+      type: "FeatureCollection",
+      features: location
+        ? [
+            {
+              type: "Feature",
+              properties: {},
+              geometry: {
+                type: "Polygon",
+                coordinates: [location.illustration],
+              },
+            },
+          ]
+        : [],
     };
     const source = map.getSource("illustrative-area") as
       GeoJSONSource | undefined;
@@ -222,7 +235,7 @@ export default function NeighborhoodMap({
     if (!ready || !map) return;
     const markers: Marker[] = [];
     if (showReports) {
-      for (const report of location.reports) {
+      for (const report of location?.reports ?? []) {
         const element = document.createElement("button");
         element.type = "button";
         element.className = "report-marker";
@@ -340,7 +353,7 @@ export default function NeighborhoodMap({
     if (width < 1 || height < 1) return;
     const points =
       route?.coordinates ??
-      (conditions
+      (conditions && location
         ? location.illustration
         : [
             ...(reference ? [reference.coordinates] : []),
@@ -366,7 +379,10 @@ export default function NeighborhoodMap({
       });
     } else
       mapRef.current?.easeTo({
-        center: reference?.coordinates ?? location.coordinates,
+        center:
+          reference?.coordinates ??
+          location?.coordinates ??
+          initialCenter.current,
         zoom: 14.4,
         duration,
       });
@@ -374,7 +390,10 @@ export default function NeighborhoodMap({
 
   function recenter() {
     mapRef.current?.easeTo({
-      center: reference?.coordinates ?? location.coordinates,
+      center:
+        reference?.coordinates ??
+        location?.coordinates ??
+        initialCenter.current,
       zoom: (container.current?.clientWidth ?? 0) < 600 ? 13.65 : 14.4,
       bearing: 0,
       duration: window.matchMedia("(prefers-reduced-motion: reduce)").matches
@@ -397,7 +416,7 @@ export default function NeighborhoodMap({
             <>
               <span>
                 {t(
-                  "Map unavailable. You can still explore the sample overview.",
+                  "Map unavailable. You can still read the location details.",
                 )}{" "}
               </span>
               <button
@@ -438,10 +457,10 @@ export default function NeighborhoodMap({
         <button
           className="recenter-control"
           aria-label={t("Recenter on {name}", {
-            name: reference?.name ?? location.name,
+            name: reference?.name ?? location?.name ?? t("Bangkok"),
           })}
           title={t("Recenter on {name}", {
-            name: reference?.name ?? location.name,
+            name: reference?.name ?? location?.name ?? t("Bangkok"),
           })}
           disabled={status !== "ready"}
           onClick={recenter}

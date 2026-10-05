@@ -1,4 +1,3 @@
-import { MOCK_AREAS } from "./mock-locations";
 export type Coordinates = [number, number];
 export const CATEGORIES = [
   { id: "essentials", label: "Everyday picks" },
@@ -575,42 +574,4 @@ export function nearbyPlaces(
         ? place.featured
         : place.category === category),
   );
-}
-
-export type SearchResult = {
-  id: string;
-  kind: "area" | "place";
-  areaId: string;
-  name: string;
-  subtitle: string;
-  typeLabel: string;
-  thaiName?: string;
-};
-export function searchLocations(query: string): SearchResult[] {
-  const normalized = query.trim().toLowerCase();
-  if (!normalized) return [];
-  const areas: SearchResult[] = MOCK_AREAS.map((area) => ({
-    id: area.id,
-    kind: "area",
-    areaId: area.id,
-    name: area.name,
-    thaiName: area.thaiName,
-    subtitle: `${area.district}, Bangkok`,
-    typeLabel: "Area",
-  }));
-  const places: SearchResult[] = MOCK_PLACES.map((place) => ({
-    id: place.id,
-    kind: "place",
-    areaId: place.areaId,
-    name: place.name,
-    subtitle: `${MOCK_AREAS.find((area) => area.id === place.areaId)?.name}, Bangkok`,
-    typeLabel: categoryLabel(place.category),
-  }));
-  return [...areas, ...places]
-    .filter((result) =>
-      `${result.name} ${result.thaiName ?? ""} ${result.subtitle}`
-        .toLowerCase()
-        .includes(normalized),
-    )
-    .slice(0, 5);
 }

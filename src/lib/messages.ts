@@ -3,6 +3,22 @@ import type { Language } from "./language";
 // English source messages are stable keys, including existing server feedback.
 // Keep UI copy here; fixture IDs, URLs and domain models stay language-neutral.
 export const thaiMessages: Record<string, string> = {
+  "Real Bangkok search, with sample exploration features.": "ค้นหาสถานที่จริงในกรุงเทพฯ พร้อมฟีเจอร์สำรวจที่ยังใช้ข้อมูลตัวอย่าง",
+  "Retry search": "ค้นหาอีกครั้ง",
+  "© OpenStreetMap contributors": "© ผู้ร่วมจัดทำ OpenStreetMap",
+  "Search locations in Bangkok": "ค้นหาสถานที่ในกรุงเทพฯ",
+  "Locations": "สถานที่",
+  "Search places and addresses in Bangkok.": "ค้นหาสถานที่และที่อยู่ในกรุงเทพฯ",
+  "Type at least 2 characters to search.": "พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา",
+  "Searching Bangkok…": "กำลังค้นหาในกรุงเทพฯ…",
+  "Search is unavailable. Please try again.": "ไม่สามารถค้นหาได้ในขณะนี้ โปรดลองอีกครั้ง",
+  "No locations found. Try another name or address in Bangkok.": "ไม่พบสถานที่ ลองใช้ชื่อหรือที่อยู่อื่นในกรุงเทพฯ",
+  "Location search by Geoapify": "ข้อมูลการค้นหาสถานที่จาก Geoapify",
+  "Choose a location": "เลือกสถานที่",
+  "This location link is incomplete or invalid. Search for a location to continue.": "ลิงก์สถานที่นี้มีข้อมูลไม่ครบหรือไม่ถูกต้อง ค้นหาสถานที่เพื่อสำรวจต่อ",
+  "Flood data and official area boundaries are not available yet. This does not indicate safety.": "ยังไม่มีข้อมูลน้ำท่วมและขอบเขตพื้นที่ทางการ การไม่มีข้อมูลไม่ได้หมายความว่าปลอดภัย",
+  "Nearby places and journeys are not available for this location yet.": "ยังไม่มีข้อมูลสถานที่ใกล้เคียงและการเดินทางสำหรับสถานที่นี้",
+  "Map unavailable. You can still read the location details.": "แผนที่ไม่พร้อมใช้งาน คุณยังอ่านรายละเอียดสถานที่ได้",
   "Illustrative route · Not for navigation":
     "เส้นทางตัวอย่าง · ไม่ใช่ข้อมูลนำทาง",
   "Everyday picks": "สถานที่ในชีวิตประจำวัน",

@@ -166,7 +166,10 @@ export default function Home() {
           <Message text={"YAAN means neighbourhood."} />{" "}
         </p>
         <p>
-          <Message text={"A working prototype with sample data."} /> <br />
+          <Message
+            text={"Real Bangkok search, with sample exploration features."}
+          />{" "}
+          <br />
           <Message text={"Explore freely. No sign-in needed."} />{" "}
         </p>
       </footer>
