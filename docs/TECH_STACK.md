@@ -205,6 +205,18 @@ Do not spread provider-specific API calls throughout UI components.
 
 ---
 
+## Administrative Boundary Data Foundation
+
+Milestone 2 Checkpoint 2 defines provider-independent administrative units, dataset provenance/manifests and Polygon/MultiPolygon boundary contracts in `src/lib/administrative-boundary.ts`. These contracts are separate from search `Location`, mock areas/fixture IDs, React and MapLibre. Identity is namespaced by code system and level; khwaeng references its parent khet. Geometry is tied to a dataset version.
+
+Milestone 2.4 extends `scripts/inspect-bangkok-boundaries.mjs` with import-only devDependencies: `shapefile@0.6.6`, `@types/shapefile@0.6.4`, `proj4@2.22.0`, and `jsts@2.12.1`. The script accepts explicit local artifacts only; it does not download releases or expose GIS packages to application/runtime code. Node handles inventory, SHA-256, DBF/SHP record-envelope safeguards and manifest validation; checked JSDoc connects tooling to the shared contracts. The Shapefile adapter verifies encoding evidence, preserves lexical identities/Thai character values, verifies actual .prj parameters against EPSG:32647, and transforms every vertex to WGS84 longitude/latitude. JSTS validates each geometry before and after transformation. Invalid/unsupported records fail closed; only ring winding is normalized, without topology repair or simplification. The older parser's orphan-hole promotion and string coercion are explicitly guarded. Narrow local declarations cover the two JSTS ESM entry points.
+
+Reports/candidates record original artifact checksums, source and output statistics, encoding/CRS evidence, release-specific counts and exact installed dependency versions. The tool hash includes all importer modules, domain contracts and the lockfile. Synthetic binary fixtures cover Thai DBF encoding, ring/part preservation, malformed records, topology failures and independent projection controls. Real BMA import qualification requires an explicitly supplied local release; no raw production artifacts were present during this implementation.
+
+Keep raw source → inspected source → normalized candidate → validated canonical dataset separate. Reports/candidates cannot activate runtime data. BMA khwaeng geometry is the primary candidate; BMA khet and independent GISTDA khet data support later validation, not runtime fallback. One reviewed, versioned canonical YAAN dataset will eventually serve runtime resolution. Source metadata, unresolved licensing, checksums and transformation evidence follow `DATA.md` and the workflow in `data/bangkok-boundaries/README.md`.
+
+This checkpoint provides no coordinate resolver, resolver endpoint, fetching hook, official map layer or UI heading. Provider administrative labels remain unverified display metadata. Milestone 1 search ranking/provider behavior and Explore navigation remain unchanged.
+
 ## Flood Data
 
 Flood datasets and risk methodology are defined by `DATA.md` and related research.

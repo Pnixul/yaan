@@ -1,0 +1,3 @@
+# Keep source downloads and inspection output out of version control by default.
+/raw/
+/work/

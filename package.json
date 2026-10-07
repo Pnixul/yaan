@@ -33,9 +33,13 @@
     "@types/node": "^24.19.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@types/shapefile": "0.6.4",
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.8",
+    "jsts": "2.12.1",
     "postcss": "^8.5.28",
+    "proj4": "2.22.0",
+    "shapefile": "0.6.6",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.3"
   }

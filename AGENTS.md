@@ -61,6 +61,31 @@ Use context efficiently without sacrificing implementation quality.
 - Preserve important product, UX, data, design, security, and architecture constraints even when minimizing context.
 - Never trade correctness, security, accessibility, or maintainability solely to reduce token usage.
 
+### Concise final responses
+
+For implementation, debugging, refactoring, testing, and inspection tasks, do the required work thoroughly, but keep final responses concise to conserve tokens.
+
+By default, report only:
+
+- what was completed, briefly;
+- verification/tests run and whether they passed;
+- blockers, unresolved issues, important risks, or decisions requiring developer input;
+- the next action only when one is actually required.
+
+Do not routinely:
+
+- enumerate every changed file;
+- repeat the task or implementation plan;
+- describe unchanged code;
+- restate requirements from the prompt;
+- provide lengthy architectural explanations;
+- include large code snippets or diffs;
+- narrate routine implementation steps.
+
+Provide detailed reports only when explicitly requested by the user or necessary to explain a failure, risk, or decision.
+
+This rule controls reporting only. It must **not** reduce the thoroughness of implementation, investigation, testing, validation, or safety checks.
+
 ---
 
 ## Working Style

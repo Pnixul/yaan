@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "dataset": {
+    "id": "bma-bangkok-khwaeng",
+    "publisher": "Bangkok Metropolitan Administration (BMA)",
+    "sourceReference": null,
+    "version": null,
+    "dates": { "published": null, "effective": null, "retrieved": null },
+    "artifacts": [],
+    "license": { "status": "unspecified", "reference": null, "terms": null },
+    "attribution": null,
+    "coverage": { "countryCode": "TH", "area": "Bangkok", "level": "khwaeng" },
+    "sourceCrs": { "definition": null, "authorityCode": null, "evidence": null },
+    "knownLimitations": [
+      "Actual BMA geometry artifacts have not yet passed YAAN inspection or qualification.",
+      "Geometry licensing metadata remains unresolved/unspecified."
+    ],
+    "transformations": []
+  },
+  "codeNamespace": "bma",
+  "fields": { "code": null, "nameTh": null, "nameEn": null, "parentCode": null },
+  "inputCoordinates": { "status": "unverified", "evidence": null },
+  "sourceEncoding": null,
+  "parentInventory": null,
+  "observedFeatureCount": null,
+  "observedParentCount": null
+}
