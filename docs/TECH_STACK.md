@@ -215,7 +215,7 @@ Reports/candidates record original artifact checksums, source and output statist
 
 Keep raw source → inspected source → normalized candidate → validated canonical dataset separate. Reports/candidates cannot activate runtime data. BMA khwaeng geometry is the primary candidate; BMA khet and independent GISTDA khet data support later validation, not runtime fallback. One reviewed, versioned canonical YAAN dataset will eventually serve runtime resolution. Source metadata, unresolved licensing, checksums and transformation evidence follow `DATA.md` and the workflow in `data/bangkok-boundaries/README.md`.
 
-This checkpoint provides no coordinate resolver, resolver endpoint, fetching hook, official map layer or UI heading. Provider administrative labels remain unverified display metadata. Milestone 1 search ranking/provider behavior and Explore navigation remain unchanged.
+Checkpoint 2.6 adds provider-independent resolver contracts in `src/lib/administrative-resolver.ts` and a pure offline implementation in `scripts/resolver/core.ts`, reusing the existing coordinate validation and development-only GIS tools. It accepts only explicitly synthetic datasets, with fixtures isolated under `scripts/fixtures`; all real-data admission remains disabled. The provider boundary, result states, coordinate/coverage semantics and future server API contract are specified in [ADMINISTRATIVE_RESOLVER.md](ADMINISTRATIVE_RESOLVER.md). There is no runtime resolver integration, endpoint, fetching hook, official map layer or UI heading. Provider administrative labels remain unverified display metadata. Milestone 1 search ranking/provider behavior and Explore navigation remain unchanged.
 
 ## Flood Data
 

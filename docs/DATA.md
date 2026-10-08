@@ -34,6 +34,10 @@ Separate raw source, inspected source, normalized candidate and validated canoni
 
 Version each source release with publisher/source reference, dates where known, artifact checksums, attribution, limitations, encoding/CRS evidence, tool/dependency versions and transformation/import evidence. Unknown metadata remains explicitly unknown. BMA geometry licensing remains `unspecified`; do not claim CC BY or other permission without source evidence. Activation remains blocked, even for a structurally and topologically valid candidate. Per-feature validity does not establish coverage, inter-feature nonoverlap, parent containment or independent source agreement. The operational manifest and inspection workflow are documented in `data/bangkok-boundaries/README.md`.
 
+### Administrative Resolver Foundation — Checkpoint 2.6
+
+BMA dataset qualification is intentionally deferred and the candidate remains inactive. The pure resolver foundation runs only against isolated synthetic fixtures with explicit non-official provenance. It distinguishes resolved, outside declared coverage, ambiguous, unavailable and invalid input; borders and overlaps never receive an arbitrary administrative assignment, and coverage gaps remain unavailable. Required missing metadata or invalid geometry blocks the dataset. No real-data provider, public endpoint or Explore integration is enabled. The contracts, CRS semantics, future API privacy requirements and activation boundary are defined in [ADMINISTRATIVE_RESOLVER.md](ADMINISTRATIVE_RESOLVER.md). Passing resolver tests does not qualify any real administrative source.
+
 ### Prototype Places and Journeys
 
 Legacy Home example links, bare Explore and authenticated Saved fixture links still use local mock areas, places, categories, flood records, and route geometry. `mock-places.ts`, `mock-locations.ts` and `mock-routes.ts` remain solely for this demo and Saved membership; the obsolete mock search is removed. Saving real search locations is deferred. Sample place names and coordinates are illustrative, not a verified POI directory. Do not imply verified opening hours, access, services, or recommendations.
