@@ -130,6 +130,10 @@ test("Thai DBF, holes and disconnected parts survive deterministic import with c
   assert.equal(candidate.boundaries[0].unit.officialCode, "001");
   assert.equal(candidate.boundaries[0].unit.parentId, "test:khet:01");
   assert.equal(report.gis.encoding.label, "windows-874");
+  assert.equal(report.qualification.status, "blocked");
+  assert.equal(report.qualification.datasetTopology.coordinateReferenceSystem, "EPSG:32647");
+  assert.equal(report.qualification.datasetTopology.enclosedVoids.length, 2);
+  assert.equal(report.qualification.gates.sourceAuthority, "unverified-needs-resource-specific-evidence");
   assert.deepEqual(report.gis.beforeTransformation.bounds, [500000, 1500000, 500500, 1500100]);
   for (const summary of [report.gis.beforeTransformation, report.summary]) {
     assert.equal(summary.featureCount, 2); assert.equal(summary.parts, 3); assert.equal(summary.holes, 2);
@@ -151,6 +155,39 @@ test("Thai DBF, holes and disconnected parts survive deterministic import with c
   assert.equal(report.tool.dependencies.shapefile, "0.6.6");
   const repeat = await inspectLocalSource(options);
   assert.deepEqual(repeat, { candidate, report });
+});
+
+test("JSON encoding metadata is inventoried alongside Shapefile; embedded archives and orphan CRS fail", async (t) => {
+  const files = artifacts();
+  delete files["boundary.cpg"];
+  files["metadata.json"] = Buffer.from(JSON.stringify({ encoding: "windows-874" }));
+  const result = await inspect(t, files, (manifest) => {
+    manifest.sourceEncoding = { label: "windows-874", artifactPath: "metadata.json", evidence: "Synthetic metadata encoding declaration" };
+  });
+  assert.ok(result.candidate);
+  assert.ok(result.report.artifacts.some((a) => a.path === "metadata.json"));
+  const archived = await inspect(t, { ...artifacts(), "archive.zip": Buffer.from("archive") });
+  assert.equal(archived.candidate, null);
+  assert.ok(archived.report.issues.some((i) => i.code === "unsupported-archive"));
+  const orphan = await inspect(t, { ...artifacts(), "orphan.prj": Buffer.from(WKT) });
+  assert.equal(orphan.candidate, null);
+  assert.ok(orphan.report.issues.some((i) => i.code === "missing-component"));
+  const ambiguous = await inspect(t, { ...artifacts(), "converted.json": Buffer.from('{"type":"FeatureCollection","features":[]}') });
+  assert.equal(ambiguous.candidate, null);
+  assert.ok(ambiguous.report.issues.some((i) => i.code === "ambiguous-source"));
+});
+
+test("overlap findings and supplied license terms never qualify or activate a normalized candidate", async (t) => {
+  const files = artifacts({ rings: [[square(500000, 1500000, 100)], [square(500050, 1500000, 100)]] });
+  const { report, candidate } = await inspect(t, files, (manifest) => {
+    manifest.dataset.license = { status: "specified", reference: "Synthetic terms", terms: "Fixture only" };
+  });
+  assert.equal(report.qualification.datasetTopology.overlaps[0].area, 5000);
+  assert.equal(report.qualification.gates.overlapReview, "findings-require-review");
+  assert.equal(report.qualification.gates.licenseSuitability, "terms-supplied-needs-review");
+  assert.equal(report.qualification.status, "blocked");
+  assert.equal(report.normalization.eligible, true);
+  assert.equal(candidate.activation.eligible, false);
 });
 
 test("UTF-8 and numeric DBF identities preserve sourced characters and lexical leading zeros", async (t) => {

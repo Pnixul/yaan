@@ -233,7 +233,15 @@ test("CLI exit codes, candidate gating and no-overwrite protection", async (t) =
   const rerun = cli(args); assert.equal(rerun.status, 2); assert.match(rerun.stderr, /overwrite/u);
   const discovery = cli(["--source", options.source]);
   assert.equal(discovery.status, 1); assert.equal(JSON.parse(discovery.stdout).summary.featureCount, 2);
+  assert.equal(JSON.parse(discovery.stdout).qualification.datasetTopology, null);
   assert.equal(cli([]).status, 2);
+  const raw = join(options.directory, "raw"); await mkdir(raw);
+  await writeFile(join(raw, "synthetic.geojson"), fixtureBytes);
+  const rawOutput = join(raw, "discovery.json");
+  const protectedRun = cli(["--source", raw, "--report", rawOutput]);
+  assert.equal(protectedRun.status, 2);
+  assert.match(protectedRun.stderr, /outside the raw source directory/u);
+  await assert.rejects(readFile(rawOutput), { code: "ENOENT" });
   await rm(candidate);
   const m = manifest(); m.inputCoordinates.status = "unverified"; await writeFile(options.manifest, json(m));
   assert.equal(cli(["--source", options.source, "--manifest", options.manifest, "--candidate", candidate]).status, 1);

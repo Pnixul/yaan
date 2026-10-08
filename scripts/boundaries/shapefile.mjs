@@ -3,6 +3,7 @@ import shapefile from "shapefile";
 import proj4 from "proj4";
 import { inspectGeoJson, inspectGeometry } from "./inspect.mjs";
 import { signedArea, topologyError } from "./topology.mjs";
+import { inspectCoverage } from "./coverage.mjs";
 
 /** @typedef {import('../../src/lib/administrative-boundary').BoundaryManifest} Manifest */
 /** @typedef {import('../../src/lib/administrative-boundary').BoundaryGeometry} Geometry */
@@ -207,6 +208,7 @@ export async function decodeShapefile(artifacts, stem, manifest) {
   const evidence = `${prj.path} sha256:${prj.sha256}; parsed parameters match EPSG:32647; [500000,0] -> [99,0] and PROJ off-axis [687071.44,6210141.33] -> [102,56] controls; output longitude/latitude`;
   return {
     source: output, issues,
+    coverage: issues.length ? null : inspectCoverage(source.features.map((feature) => feature.geometry), "EPSG:32647"),
     sourceCrs: { definition, authorityCode: "EPSG:32647", evidence },
     encoding: { label: encoding, cpg: cpg ? { path: cpg.path, sha256: cpg.sha256, text: cpgText } : null,
       metadata: attestation ?? null, languageDriverId: table.languageDriverId },

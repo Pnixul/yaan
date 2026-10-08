@@ -271,9 +271,10 @@ export function inspectGeoJson(source, manifest) {
 export function activationBlockers(manifest) {
   return [
     "The local importer cannot activate datasets; a separate reviewed, versioned canonical qualification is required",
-    "Per-feature topology validation does not establish dataset overlaps/gaps or coverage",
+    "Dataset overlap/void measurements require review; Bangkok coverage and exterior-connected gaps need an independent reference",
     "BMA khwaeng-to-khet spatial validation and independent GISTDA khet comparison are pending",
-    "Source identity, CRS evidence, Thai encoding/names and inventory completeness require manual verification",
+    "Source authority and the exact resource/release identity are not established by checksums or operator metadata",
+    "CRS evidence, Thai encoding/names and inventory completeness require manual verification",
     ...(manifest?.dataset.license.status !== "specified" ? ["License terms remain unresolved/unspecified"] : ["License suitability for intended use requires review"]),
   ];
 }

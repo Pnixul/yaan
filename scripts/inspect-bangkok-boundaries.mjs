@@ -1,14 +1,15 @@
 // @ts-check
 import { lstat, readdir, readFile, writeFile } from "node:fs/promises";
-import { basename, dirname, extname, join, resolve } from "node:path";
+import { basename, dirname, extname, join, resolve, relative, isAbsolute, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import { activationBlockers, inspectGeoJson, json, metadataIssues, sha256, validateManifest } from "./boundaries/inspect.mjs";
 import { decodeShapefile } from "./boundaries/shapefile.mjs";
+import { inspectCoverage } from "./boundaries/coverage.mjs";
 
 /** @typedef {import('../src/lib/administrative-boundary').BoundaryCandidate} BoundaryCandidate */
 /** @typedef {{code: string, message: string, featureIndex?: number}} Issue */
-const TOOL_VERSION = "2.4";
+const TOOL_VERSION = "2.5";
 const require = createRequire(import.meta.url);
 /** Reject invalid UTF-8 instead of silently replacing bytes in sourced Thai names. */
 /** @param {Buffer} bytes */
@@ -68,9 +69,19 @@ export async function inspectLocalSource(options) {
     for (const artifact of expected) if (!artifacts.some((item) => item.path === artifact.path)) issues.push({ code: "missing-artifact", message: `Manifest artifact absent: ${artifact.path}` });
   }
   const shapeFiles = artifacts.filter((a) => extname(a.path).toLowerCase() === ".shp");
-  const shapeStems = [...new Set(artifacts.filter((a) => [".shp", ".shx", ".dbf"].includes(extname(a.path).toLowerCase()))
+  const shapeStems = [...new Set(artifacts.filter((a) => [".shp", ".shx", ".dbf", ".prj", ".cpg"].includes(extname(a.path).toLowerCase()))
     .map((a) => basename(a.path, extname(a.path)).toLowerCase()))];
-  const geojsonFiles = artifacts.filter((a) => [".geojson", ".json"].includes(extname(a.path).toLowerCase()));
+  const geojsonFiles = artifacts.filter((a) => {
+    const extension = extname(a.path).toLowerCase();
+    if (extension === ".geojson") return true;
+    if (extension !== ".json") return false;
+    if (!shapeStems.length) return true;
+    // A Shapefile release may include checksummed JSON source metadata.
+    try { return decodeJson(a.content)?.type === "FeatureCollection"; } catch { return false; }
+  });
+  if (artifacts.some((a) => [".zip", ".7z", ".rar", ".gz", ".tar"].includes(extname(a.path).toLowerCase()))) {
+    issues.push({ code: "unsupported-archive", message: "Keep archives outside the flat extracted release directory" });
+  }
   const projectionFiles = artifacts.filter((a) => [".prj", ".cpg"].includes(extname(a.path).toLowerCase()))
     .map((a) => ({ path: a.path, text: a.content.toString("utf8"), interpreted: false }));
   /** @type {{source: string, required: Record<string, boolean>}[]} */
@@ -84,10 +95,13 @@ export async function inspectLocalSource(options) {
   }
   let inspection = null;
   let decoded = null;
+  /** @type {ReturnType<typeof inspectCoverage> | null} */
+  let coverage = null;
   if (shapeFiles.length + geojsonFiles.length > 1 || shapeStems.length > 1) issues.push({ code: "ambiguous-source", message: "Supply exactly one geometry artifact/release per run; do not combine providers or original and converted geometry" });
   if (shapeFiles.length === 1 && shapeStems.length === 1 && !geojsonFiles.length && !issues.some((i) => i.code === "missing-component")) {
     try {
       decoded = await decodeShapefile(artifacts, shapeStems[0], manifest);
+      coverage = decoded.coverage;
       issues.push(...decoded.issues);
       // This is an output attestation, never a relabeling/mutation of the raw-input manifest.
       const normalizedManifest = manifest ? { ...manifest, inputCoordinates: {
@@ -105,6 +119,9 @@ export async function inspectLocalSource(options) {
       const source = decodeJson(geojsonFiles[0].content);
       inspection = inspectGeoJson(source, manifest);
       issues.push(...inspection.issues);
+      if (inspection.issues.length === 0 && manifest?.inputCoordinates.status === "verified-wgs84-longitude-latitude") {
+        coverage = inspectCoverage(source.features.map((/** @type {{geometry: unknown}} */ feature) => feature.geometry), "OGC:CRS84");
+      }
     } catch { issues.push({ code: "invalid-geojson-json", message: "Geometry artifact is not valid JSON or contains an invalid string encoding" }); }
   } else if (!shapeFiles.length && !geojsonFiles.length) issues.push({ code: "unsupported-format", message: "Missing capability: archive/container decoding. Supply an explicitly extracted Shapefile set or GeoJSON FeatureCollection; ZIP and other formats are not parsed." });
   const normalizationBlockers = [...issues];
@@ -116,7 +133,7 @@ export async function inspectLocalSource(options) {
   }
   if (!inspection) normalizationBlockers.push({ code: "geometry-uninspected", message: "Geometry, fields, count and topology cannot be inferred from file names or projection text" });
   const toolFiles = ["./inspect-bangkok-boundaries.mjs", "./boundaries/inspect.mjs", "./boundaries/shapefile.mjs",
-    "./boundaries/topology.mjs", "./boundaries/gis-types.d.ts", "../src/lib/administrative-boundary.ts", "../package-lock.json"];
+    "./boundaries/topology.mjs", "./boundaries/coverage.mjs", "./boundaries/gis-types.d.ts", "../src/lib/administrative-boundary.ts", "../package-lock.json"];
   const toolInputs = await Promise.all(toolFiles.map(async (path) => ({ path, sha256: sha256(await readFile(new URL(path, import.meta.url))) })));
   const toolSha256 = sha256(json(toolInputs));
   const dependencies = Object.fromEntries(await Promise.all(["shapefile", "@types/shapefile", "proj4", "jsts"].map(async (name) => {
@@ -139,6 +156,22 @@ export async function inspectLocalSource(options) {
     summary: inspection?.summary ?? null,
     issues, warnings,
     normalization: { eligible: normalizationBlockers.length === 0, blockers: normalizationBlockers },
+    qualification: {
+      status: "blocked",
+      datasetTopology: coverage,
+      gates: {
+        importIntegrity: normalizationBlockers.length ? "blocked" : "passed",
+        overlapReview: !coverage || coverage.status !== "measured" ? "unchecked" : coverage.overlaps.length ? "findings-require-review" : "no-positive-area-overlaps-observed",
+        gapReview: !coverage?.enclosedVoids ? "unchecked" : coverage.enclosedVoids.length ? "findings-require-review" : "no-enclosed-voids-observed",
+        coverageCompleteness: "unverified-needs-independent-reference",
+        parentInventory: manifest?.parentInventory ? "operator-supplied-membership-only-needs-independent-verification" : "missing",
+        parentSpatialContainment: "missing-parent-geometry",
+        independentKhetAgreement: "missing-independent-geometry",
+        sourceAuthority: "unverified-needs-resource-specific-evidence",
+        licenseSuitability: manifest?.dataset.license.status === "specified" ? "terms-supplied-needs-review" : "unresolved",
+        administrativeNames: "needs-authoritative-review",
+      },
+    },
     activation: { eligible: /** @type {const} */ (false), blockers: activationBlockers(manifest) },
   };
   /** @type {BoundaryCandidate | null} */
@@ -180,7 +213,14 @@ async function main(args) {
   if (!options["--source"]) throw new Error("An explicit local --source path is required");
   const outputs = [options["--report"], options["--candidate"]].filter(Boolean).map((path) => resolve(path));
   if (new Set(outputs).size !== outputs.length) throw new Error("Report and candidate must have distinct output paths");
+  const source = resolve(options["--source"]);
+  const directoryMode = (await lstat(source)).isDirectory();
+  const sourceDirectory = directoryMode ? source : dirname(source);
   for (const path of outputs) {
+    const withinSource = relative(sourceDirectory, path);
+    if ((directoryMode || extname(source).toLowerCase() === ".shp") && !isAbsolute(withinSource) && withinSource !== ".." && !withinSource.startsWith(`..${sep}`)) {
+      throw new Error(`Outputs must be outside the raw source directory: ${path}`);
+    }
     try { await lstat(path); } catch (error) {
       if (/** @type {NodeJS.ErrnoException} */ (error).code === "ENOENT") continue;
       throw error;
