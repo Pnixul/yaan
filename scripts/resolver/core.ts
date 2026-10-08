@@ -27,7 +27,7 @@ function readGeometry(geometry: BoundaryGeometry) {
   return new GeoJSONReader().read(geometry);
 }
 
-function validUnit(unit: AdministrativeUnit, level: string): boolean {
+export function validUnit(unit: AdministrativeUnit, level: string): boolean {
   return unit != null && unit.level === level && code(unit.officialCode) &&
     /^synthetic(?:-[a-z0-9]+)*$/u.test(unit.codeNamespace) &&
     unit.id === unitId(unit.codeNamespace, unit.level, unit.officialCode) &&
@@ -59,6 +59,12 @@ function prepare(dataset: AdministrativeResolverDataset) {
     return { unit, geometry: parsed };
   }).sort((a, b) => a.unit.id < b.unit.id ? -1 : a.unit.id > b.unit.id ? 1 : 0);
   return { provenance: p, coverage, boundaries };
+}
+
+/** Shared offline adapter validation, with the same constraints as resolver preparation. */
+export function validateResolverDataset(dataset: AdministrativeResolverDataset): boolean {
+  try { prepare(dataset); return true; }
+  catch { return false; }
 }
 
 /** Pure in-memory foundation. The only admitted datasets at 2.6 are synthetic.
