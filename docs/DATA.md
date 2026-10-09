@@ -42,6 +42,10 @@ BMA dataset qualification is intentionally deferred and the candidate remains in
 
 The offline normalized adapter requires a separate authorization record pinning exact dataset identity/version, payload and qualification-report hashes. Required authority, license and authorization evidence must be explicitly reviewed and checksum-matched; absent, malformed, inconsistent or unverified evidence denies admission. An `activation.eligible` field alone proves nothing. Approval is restricted to isolated synthetic offline tests and always retains `activation.eligible: false`; all real datasets are denied. Hash verification proves integrity relative to trusted pins, not source authenticity or permission. BMA qualification reports and candidate data remain unchanged and inactive. Contracts, diagnostic behavior and the caller-managed trust boundary are documented in [ADMINISTRATIVE_RESOLVER.md](ADMINISTRATIVE_RESOLVER.md).
 
+### Synthetic Integration Contract — Checkpoint 2.9
+
+The offline transport accepts only named WGS84 coordinates and preserves resolver result semantics. Public response projection excludes input coordinates, geometry, activation, review references and authorization/audit metadata. Dataset selection and independent approval remain server-owned, outside request data. No public endpoint, real-data admission or UI integration is enabled. Request limits, no-store behavior and future integration requirements are specified in [ADMINISTRATIVE_RESOLVER.md](ADMINISTRATIVE_RESOLVER.md).
+
 ### Prototype Places and Journeys
 
 Legacy Home example links, bare Explore and authenticated Saved fixture links still use local mock areas, places, categories, flood records, and route geometry. `mock-places.ts`, `mock-locations.ts` and `mock-routes.ts` remain solely for this demo and Saved membership; the obsolete mock search is removed. Saving real search locations is deferred. Sample place names and coordinates are illustrative, not a verified POI directory. Do not imply verified opening hours, access, services, or recommendations.

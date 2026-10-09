@@ -217,6 +217,8 @@ Keep raw source → inspected source → normalized candidate → validated cano
 
 Checkpoint 2.6 adds provider-independent resolver contracts in `src/lib/administrative-resolver.ts` and a pure offline implementation in `scripts/resolver/core.ts`, reusing the existing coordinate validation and development-only GIS tools. It accepts only explicitly synthetic datasets, with fixtures isolated under `scripts/fixtures`; all real-data admission remains disabled. The provider boundary, result states, coordinate/coverage semantics and future server API contract are specified in [ADMINISTRATIVE_RESOLVER.md](ADMINISTRATIVE_RESOLVER.md). There is no runtime resolver integration, endpoint, fetching hook, official map layer or UI heading. Provider administrative labels remain unverified display metadata. Milestone 1 search ranking/provider behavior and Explore navigation remain unchanged.
 
+Checkpoint 2.9 adds shared administrative transport types and explicit map-position conversion in `src/lib/administrative-transport.ts`, with a synchronous offline handler under `scripts/resolver/transport.ts`. It accepts bounded UTF-8 JSON bytes and a separately supplied server-owned resolver, returning allowlisted response bodies and no-store headers. It neither selects nor authorizes datasets; real admission and development-only GIS packaging are unchanged. The [transport contract](ADMINISTRATIVE_RESOLVER.md#offline-transport-contract--checkpoint-29) defines validation, status mappings and future stream/operational requirements. No Next.js route or application integration is introduced.
+
 ## Flood Data
 
 Flood datasets and risk methodology are defined by `DATA.md` and related research.

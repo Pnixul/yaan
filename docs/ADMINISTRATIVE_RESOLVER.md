@@ -1,4 +1,4 @@
-# Administrative coordinate resolver and dataset adapter — Checkpoint 2.7
+# Administrative resolver, dataset adapter and transport — Checkpoint 2.9
 
 Status: pure, offline foundation tested only with synthetic data. **No endpoint, application integration or real dataset admission exists.** BMA qualification is deferred; its candidate remains inactive. Data policy belongs to [DATA.md](DATA.md), architecture to [TECH_STACK.md](TECH_STACK.md), and prior qualification to [the boundary workflow](../data/bangkok-boundaries/README.md).
 
@@ -10,6 +10,9 @@ Status: pure, offline foundation tested only with synthetic data. **No endpoint,
 - `scripts/administrative-resolver.test.mjs`: Node tests using the project's TypeScript transpilation convention and the actual installed GIS implementation.
 - `src/lib/administrative-dataset-adapter.ts` and `scripts/resolver/adapter.ts`: normalized input, explicit offline review/authorization contracts, pure evidence gate and adapter. The resolver exposes its existing validators for reuse; matching semantics are unchanged.
 - `scripts/fixtures/administrative-adapter.ts` and `scripts/administrative-adapter.test.mjs`: isolated evidence simulations and approval/denial tests. The shared TypeScript test loader lives in `scripts/test-support/administrative-modules.mjs`.
+- `src/lib/administrative-transport.ts`: request/response types, byte limit and explicit map-position conversion; no GIS imports.
+- `scripts/resolver/transport.ts`: pure synchronous `handleAdministrativeRequest(request, resolver)` over supplied bytes and a separately supplied server-owned resolver. No HTTP listener, Next.js route, network/filesystem access, logging or persistence.
+- `scripts/administrative-transport.test.mjs`: synthetic transport behavior, adapter-to-resolver composition, serialization/privacy and invalid-request tests.
 
 `AdministrativeDatasetProvider.getDataset()` supplies a typed dataset snapshot or `null`. The 2.7 adapter produces that snapshot from validated, normalized synthetic features. Acquisition, decoding, reprojection and real qualification/release selection remain outside this implementation. Provider exceptions become generic `unavailable` results. The factory reads once; replacing data requires constructing another resolver. Provider and caller mutations cannot alter a prepared snapshot; returned objects are detached copies.
 
@@ -69,9 +72,25 @@ All identities must be unique and consistent with the declared namespace/level/c
 
 Polygon holes exclude their interiors; hole edges are boundaries. MultiPolygon parts share one identity. A shared edge/vertex is ambiguous, as is an outer edge touched by only one unit. A coverage border can return ambiguity with an empty `matches` array. Boundary reasons take account of every match; `overlap` specifically means multiple interior matches. Matches are sorted lexically by stable ID solely for deterministic presentation, with no priority or arbitrary winner. The resolver does not infer confidence, geographic accuracy or legal boundary ownership.
 
-## Future server API contract — documentation only
+## Offline transport contract — Checkpoint 2.9
 
-Reserved proposal: `POST /api/administrative/resolve`, JSON body containing only the named coordinate fields. The server chooses one admitted canonical dataset/version and administrative level; callers cannot supply dataset URLs, polygons, provider names or activation flags. This would remain separate from Geoapify search and accessible to guest exploration, subject to future operational controls. No route is implemented or exposed at 2.6.
+The HTTP semantics below are executable offline; `POST /api/administrative/resolve` remains a **reserved proposal, not an implemented route**. The adapter returns a typed plain `{ status, headers, body }` value, not a framework `Response`. A future server wrapper would serialize that body and preserve the status and headers. It remains separate from Geoapify search and would support guest exploration, subject to operational controls.
+
+`AdministrativeTransportRequest` accepts only the transport envelope `{ method, contentType, body: Uint8Array }`. The body is the actual supplied byte view, not a JSON object or a claimed Content-Length. The handler validates, in order:
+
+1. Exact method `POST`; other methods, including HEAD/OPTIONS, yield 405 with `Allow: POST`.
+2. `application/json`, case-insensitive, optionally followed by `; charset=utf-8` (also quoted). Horizontal whitespace around the semicolon and surrounding whitespace are accepted; other parameters, charsets, combined media types and CR/LF are rejected with 415.
+3. At most **1,024 body bytes**, inclusive, before decoding or parsing; larger bodies yield 413. This is a small transport limit, not a geographic rule.
+4. Strict UTF-8 and valid JSON without a BOM; malformed encoding/JSON yields 400.
+5. Exactly two numeric members, `latitude` and `longitude`, finite and within the existing resolver ranges. Extra/missing/duplicate members, nested values, strings, arrays and null yield 400 before resolver invocation. Escaped JSON keys are interpreted normally. No coercion, clamping or automatic swapping occurs.
+
+`administrativeRequestFromPosition([longitude, latitude])` explicitly converts map/GeoJSON order to the named request body without rounding. It is a construction helper, not validation or a new coordinate system. The handler reconstructs only the validated named fields for the resolver; the existing core converts them to geometry order. For example, the asymmetric synthetic point `[32, 2]` becomes `{ latitude: 2, longitude: 32 }`.
+
+Resolver states preserve their geographic meaning. Public serialization explicitly selects unit identity, level, sourced names and parent ID when applicable; dataset ID/version, publisher, source reference, qualification **status only**, official flag, limitations and coverage description. Nested objects/arrays are detached. It excludes activation fields, qualification review references, evidence, authorization/audit records, geometry, request coordinates and extra properties. Source references and all public descriptive strings must be suitable for disclosure when a future canonical release is prepared; the transport cannot determine whether a source author embedded sensitive text in a legitimate name/description field.
+
+The supplied resolver is a **trusted server dependency**, never deserialized from the request. The handler does not choose releases, load artifacts, call the adapter/gate, construct approval records, or independently authenticate its caller. A test can compose an admitted synthetic adapter snapshot with the existing resolver; if adaptation is denied, server composition must return unavailable without substituting fixtures or an older release. A directly injected test double is not production authorization. Both existing real-data admission barriers remain unchanged.
+
+Future canonical release selection must remain server-owned, fixed to independently authorized identity/version/digests, and separate from provider-controlled evidence. Public callers cannot submit dataset URLs, versions, levels, providers, geometry, evidence or activation/authorization fields. Such JSON fields are rejected, not forwarded. HTTP headers or query strings must never become an alternate selection channel in a future wrapper.
 
 Request example (deliberately synthetic coordinates):
 
@@ -82,7 +101,7 @@ Content-Type: application/json
 {"latitude":4,"longitude":3}
 ```
 
-Illustrative response from the **offline synthetic resolver**, not a live API or an acceptable production dataset:
+Illustrative `200` body from the **offline synthetic transport**, not a live API or an acceptable production dataset. Headers are `Cache-Control: no-store` and `Content-Type: application/json; charset=utf-8`:
 
 ```json
 {
@@ -100,9 +119,8 @@ Illustrative response from the **offline synthetic resolver**, not a live API or
     "version": "1",
     "publisher": "YAAN test authors",
     "sourceReference": "repository:scripts/fixtures/administrative-resolver.ts",
-    "qualification": { "status": "synthetic", "reference": null },
+    "qualification": { "status": "synthetic" },
     "official": false,
-    "activation": { "eligible": false },
     "knownLimitations": ["Invented test geometry and names; no real administrative coverage."],
     "coverage": { "id": "synthetic:test-area", "description": "Fictional test area", "level": "khwaeng" }
   }
@@ -111,22 +129,32 @@ Illustrative response from the **offline synthetic resolver**, not a live API or
 
 | HTTP status | Response / semantics |
 | --- | --- |
-| `200` | `resolved`, `outside_coverage`, or `ambiguous` using `AdministrativeResolution`. Outside/ambiguity are valid lookup outcomes, not HTTP 404/409 errors. |
+| `200` | `resolved`, `outside_coverage`, or `ambiguous` using `PublicAdministrativeSuccess`, the allowlisted projection of `AdministrativeResolution`. Outside/ambiguity are valid lookup outcomes, not HTTP 404/409 errors. |
 | `400` | Malformed JSON or invalid coordinates: `{"status":"invalid_input","reason":"invalid_coordinates"}`. |
 | `503` | `unavailable` with a typed generic reason. Example with no active dataset: `{"status":"unavailable","reason":"no_dataset"}`. A known gap uses `coverage_gap`; it is not necessarily transient. No fabricated retry interval. |
 | `405` | Unsupported method; `Allow: POST` and `{"error":"method_not_allowed"}`. |
 | `415` | Non-JSON content type: `{"error":"unsupported_media_type"}`. |
-| `413` | Body exceeds the future route's configured small request limit: `{"error":"request_too_large"}`. |
-| `500` | Unexpected transport/server failure: `{"error":"internal_error"}`. No exception text or source payload. |
+| `413` | Actual body exceeds 1,024 bytes: `{"error":"request_too_large"}`. |
+| `500` | Resolver throws, returns an unknown state/reason, or public serialization fails: `{"error":"internal_error"}`. No exception text or source payload. |
 
 Examples for the supplied offline fixture: `(longitude 11, latitude 4)` is `outside_coverage` with dataset provenance; `(5,4)` is `ambiguous` with reason `boundary`, both units in `matches`, and `coverageBoundary: false`; `(1.5,1.5)` returns `{"status":"unavailable","reason":"coverage_gap"}`; a string latitude returns the `400` body above. Resolved/outside/ambiguous results always describe which dataset was consulted. Unavailable/invalid responses deliberately omit potentially incomplete or untrusted dataset metadata. Full polygon geometry and input coordinates are not returned.
 
-All future responses must use `Cache-Control: no-store`. POST keeps precise coordinates out of query strings and ordinary URL/access logs; application, proxy and observability configuration must also suppress request bodies/precise coordinates. Do not persist lookups, build coordinate-keyed shared caches, log provider payloads or send coordinates to third parties. Process only coordinates intentionally submitted for the lookup; no background geolocation. This contract does not change existing Explore URL behavior or grant permission to store saved locations. Body limits, abuse controls, transport tests and active-dataset admission must be established before exposing an endpoint.
+The six existing unavailable reasons (`no_dataset`, `provider_error`, `dataset_not_enabled`, `invalid_dataset`, `coverage_gap`, `geometry_error`) map to 503 with only status/reason. A caught provider/geometry failure is thus distinct from an unexpected throw escaping the resolver (500). An `invalid_input` resolver result is normalized to the same generic 400 response. No error response includes dataset or authorization metadata.
+
+All returned responses, including successes and every error, carry `Cache-Control: no-store` and the JSON content type. No response supplies a retry interval. POST keeps new lookup coordinates out of query strings and ordinary URL/access logs; application, proxy and observability configuration must also suppress request bodies/precise coordinates. Do not persist lookups, build coordinate-keyed shared caches, log provider payloads or send coordinates to third parties. Process only coordinates intentionally submitted for the lookup; no background geolocation. This contract does not change existing Explore URL behavior (which already includes coordinates) or grant permission to store saved locations.
+
+### Requirements before live integration
+
+- Independently qualify and authorize the real canonical release, including names, hierarchy/parent geometry, coverage, topology findings, source authority and license suitability. No synthetic result may be served by a production endpoint.
+- Review production admission and runtime GIS packaging separately; keep one prepared server snapshot per release rather than preparing geometry per lookup. Measure actual release preparation/memory/lookup costs before adding an index.
+- Bound HTTP stream reads before buffering (stop at limit + 1), independently of Content-Length; define supported content encoding and reject unsupported compression. This pure adapter checks already collected bytes and cannot protect an earlier unbounded read. Map wrapper read failures generically, preserve all response headers, and verify framework-specific HEAD/OPTIONS handling.
+- Establish abuse controls and verify body/coordinate redaction throughout deployment logging. Never derive resolver selection or trusted authorization from request headers, query parameters or body fields.
+- Test deployed packaging and transport, then add a cancellable client lifecycle with stale-response protection and all unknown/error states. Home/Explore and their current demo isolation are unchanged at 2.9.
 
 ## Verification and stop boundary
 
 ```powershell
-node --test scripts/administrative-adapter.test.mjs scripts/administrative-resolver.test.mjs
+node --test scripts/administrative-adapter.test.mjs scripts/administrative-resolver.test.mjs scripts/administrative-transport.test.mjs
 npm test
 npm run lint
 npm run typecheck
@@ -134,4 +162,4 @@ npm run build
 git diff --check
 ```
 
-Focused tests use synthetic inputs only: resolver behavior plus evidence pins, tampering/replay, required authority/license/authorization, qualification decisions, schema/release versions, hierarchy, malformed geometry and BMA metadata denial. These tests provide no BMA qualification or API/production readiness claim. Checkpoint 2.7 ends at the offline adapter and fail-closed gate. The next checkpoint requires a separately scoped trust/qualification plan before any real-data adapter or production admission; runtime packaging, public API implementation and application integration remain deferred.
+Focused tests use synthetic inputs only: resolver behavior, evidence pins and denial, plus the offline transport's byte/JSON validation, HTTP mappings, explicit axis conversion, generic failures, no-store headers and public serialization. Existing BMA metadata denial tests read no BMA geometry. These tests provide no real-data qualification or deployed API/production readiness claim. Checkpoint 2.9 stops at the offline integration contract. Production authorization, runtime packaging, a public route and application integration remain deferred; the next product priority is real nearby essentials, not additional boundary infrastructure.

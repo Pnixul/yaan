@@ -19,7 +19,7 @@ export function loadAdministrativeModule(path, overrides = {}) {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: false },
   });
   const exports = {};
-  runInNewContext(outputText, { exports, structuredClone, require: (name) =>
+  runInNewContext(outputText, { exports, structuredClone, TextDecoder, require: (name) =>
     overrides[name] ?? dependencies[name] ?? loadAdministrativeModule(new URL(`${name}.ts`, url).href, overrides) });
   return exports;
 }
